@@ -262,26 +262,48 @@ with st.expander("📚 4. Find Resource Page Opportunities"):
         else:
             st.warning("Please enter a topic.")
 
-# --- 5. Find Files You Don’t Want in Google’s Index ---
-with st.expander("🚫 5. Find Files You Don’t Want in Google’s Index"):
-    st.markdown("Locate unintended file types (e.g., sensitive documents) indexed on your site.")
-    file_site = st.text_input("Your Site Domain (e.g., yoursite.com)", key="file_site")
-    file_types = st.multiselect(
+# --- 5. Find Specific File Types on a Site ---
+with st.expander("📄 5. Find Specific File Types on a Site"):
+    st.markdown("Locate specific file types (e.g., PDFs, presentations) on a given site or broadly.")
+    file_search_scope = st.radio(
+        "Search Scope",
+        ("On a specific site", "Broadly across the web"),
+        key="file_search_scope"
+    )
+    file_site_optional = ""
+    if file_search_scope == "On a specific site":
+        file_site_optional = st.text_input("Site Domain (e.g., yoursite.com)", key="file_site_optional")
+        if file_site_optional and not is_valid_domain(file_site_optional):
+            st.warning("Invalid format for 'Site Domain'. Please enter a valid domain (e.g., yoursite.com).")
+            file_site_optional = "" # Clear invalid input
+    
+    file_types_to_find = st.multiselect(
         "File Types to Find",
         ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "csv", "xml", "txt", "zip", "sql", "env", "bak"],
-        default=["pdf", "doc", "xls"],
-        key="file_types"
+        default=["pdf"],
+        key="file_types_to_find"
     )
-    if st.button("Generate Query for Unwanted Files", key="unwanted_files_button"):
-        if file_site and not is_valid_domain(file_site):
-            st.warning("Invalid format for 'Your Site Domain'. Please enter a valid domain (e.g., yoursite.com).")
-        elif file_site and file_types:
-            filetype_query = " | ".join([f"filetype:{ft}" for ft in file_types])
-            query = f"site:{file_site} ({filetype_query})"
+    file_keywords = st.text_input("Keywords (optional, e.g., 'report')", key="file_keywords")
+
+    if st.button("Generate Query for File Types", key="file_type_button"):
+        if not file_types_to_find:
+            st.warning("Please select at least one file type.")
+        elif file_search_scope == "On a specific site" and not file_site_optional:
+            st.warning("Please enter a site domain for specific site search.")
+        else:
+            query_parts = []
+            if file_site_optional:
+                query_parts.append(f"site:{file_site_optional}")
+            if file_keywords:
+                query_parts.append(file_keywords)
+            
+            filetype_query = " | ".join([f"filetype:{ft}" for ft in file_types_to_find])
+            query_parts.append(f"({filetype_query})")
+            
+            query = " ".join(query_parts).strip()
             st.code(query)
             open_google_search(query)
-        else:
-            st.warning("Please enter a domain and select at least one file type.")
+
 
 # --- 6. Find Opportunities to Add Internal Links ---
 with st.expander("🔗 6. Find Opportunities to Add Internal Links"):
@@ -362,6 +384,157 @@ with st.expander("⚡ 10. Find How Fast Your Competitors are Publishing New Cont
                 open_google_search(query)
             else:
                 st.warning("Please enter a competitor domain and at least one date.")
+
+# --- NEW USE CASES ---
+
+# --- 11. Find Non-Secure Pages ---
+with st.expander("🔒 11. Find Non-Secure Pages"):
+    st.markdown("Identify pages on your site that are not using HTTPS.")
+    non_secure_domain = st.text_input("Your Website Domain (e.g., yoursite.com)", key="non_secure_domain")
+    if st.button("Generate Query for Non-Secure Pages", key="non_secure_button"):
+        if non_secure_domain:
+            if not is_valid_domain(non_secure_domain):
+                st.warning("Invalid format for domain. Please enter a valid domain (e.g., yoursite.com).")
+            else:
+                query = f"site:{non_secure_domain} -inurl:https"
+                st.code(query)
+                open_google_search(query)
+        else:
+            st.warning("Please enter a domain.")
+
+# --- 12. Find Plagiarized Content ---
+with st.expander("📝 12. Find Plagiarized Content"):
+    st.markdown("Search for exact matches of your content across the web to detect plagiarism.")
+    plagiarism_text = st.text_area("Exact text snippet to search for (e.g., a sentence or paragraph from your content)", key="plagiarism_text")
+    if st.button("Generate Query for Plagiarized Content", key="plagiarism_button"):
+        if plagiarism_text:
+            query = f"allintext:\"{plagiarism_text}\""
+            st.code(query)
+            open_google_search(query)
+        else:
+            st.warning("Please enter a text snippet.")
+
+# --- 13. Find Prolific Guest Bloggers ---
+with st.expander("🧑‍💻 13. Find Prolific Guest Bloggers"):
+    st.markdown("Discover authors who frequently publish guest posts in your niche.")
+    blogger_niche = st.text_input("Niche/Keywords (e.g., 'SEO')", key="blogger_niche")
+    specific_author = st.text_input("Specific Author Name (optional, e.g., 'neil patel')", key="specific_author")
+    if st.button("Generate Query for Guest Bloggers", key="guest_blogger_button"):
+        query_parts = []
+        if blogger_niche:
+            query_parts.append(blogger_niche)
+        
+        if specific_author:
+            # Format author name for URL (e.g., neil-patel)
+            formatted_author = specific_author.lower().replace(" ", "-")
+            query_parts.append(f"inurl:author/{formatted_author}")
+        else:
+            query_parts.append("inurl:author/") # Search for any author URL pattern
+
+        query = " ".join(query_parts).strip()
+        if query:
+            st.code(query)
+            open_google_search(query)
+        else:
+            st.warning("Please enter a niche/keywords.")
+
+# --- 14. Find Competitor's Top Pages for a Keyword ---
+with st.expander("📈 14. Find Competitor's Top Pages for a Keyword"):
+    st.markdown("Identify popular pages on a competitor's site related to a specific keyword or topic.")
+    comp_top_pages_domain = st.text_input("Competitor Domain (e.g., moz.com)", key="comp_top_pages_domain")
+    comp_top_pages_keyword = st.text_input("Keyword/Topic in URL (e.g., 'link building')", key="comp_top_pages_keyword")
+    if st.button("Generate Query for Competitor Top Pages", key="comp_top_pages_button"):
+        if comp_top_pages_domain and not is_valid_domain(comp_top_pages_domain):
+            st.warning("Invalid format for 'Competitor Domain'. Please enter a valid domain (e.g., moz.com).")
+        elif comp_top_pages_domain and comp_top_pages_keyword:
+            query = f"site:{comp_top_pages_domain} inurl:\"{comp_top_pages_keyword}\""
+            st.code(query)
+            open_google_search(query)
+        else:
+            st.warning("Please enter both competitor domain and a keyword/topic.")
+
+# --- 15. Find Content in a Numeric Range ---
+with st.expander("🔢 15. Find Content in a Numeric Range"):
+    st.markdown("Search for content containing numbers within a specified range (e.g., prices, years).")
+    numeric_keywords = st.text_input("Keywords (e.g., 'best laptops')", key="numeric_keywords")
+    min_value = st.number_input("Minimum Value", min_value=0, value=10, key="min_value")
+    max_value = st.number_input("Maximum Value", min_value=0, value=100, key="max_value")
+    currency_symbol = st.text_input("Optional Currency Symbol (e.g., $, £, €)", key="currency_symbol", max_chars=1)
+
+    if st.button("Generate Query for Numeric Range", key="numeric_range_button"):
+        if min_value >= max_value:
+            st.warning("Minimum value must be less than maximum value.")
+        else:
+            range_query = f"{currency_symbol}{min_value}..{currency_symbol}{max_value}"
+            query = f"{numeric_keywords} {range_query}".strip()
+            st.code(query)
+            open_google_search(query)
+
+# --- 16. Find Non-HTTPS Pages (Duplicate of #11, removing) ---
+# --- 17. Find Plagiarized Content (Duplicate of #12, removing) ---
+# --- 18. Find Credible Sources for Articles (Using Filetype) ---
+with st.expander("📄 16. Find Credible Sources for Articles"):
+    st.markdown("Locate academic papers, reports, or presentations in specific file formats for research.")
+    source_keywords = st.text_input("Keywords for Research (e.g., 'LLM training data')", key="source_keywords")
+    source_file_types = st.multiselect(
+        "Preferred File Types",
+        ["pdf", "ppt", "pptx", "doc", "docx"],
+        default=["pdf"],
+        key="source_file_types"
+    )
+    if st.button("Generate Query for Credible Sources", key="credible_sources_button"):
+        if source_keywords and source_file_types:
+            filetype_query = " | ".join([f"filetype:{ft}" for ft in source_file_types])
+            query = f"{source_keywords} ({filetype_query})"
+            st.code(query)
+            open_google_search(query)
+        else:
+            st.warning("Please enter keywords and select at least one file type.")
+
+# --- 19. Find Products in a Specific Price Range (Duplicate of #15, removing) ---
+
+st.markdown("---")
+
+# --- Google Search Operators Cheatsheet ---
+st.header("Google Search Operators Cheatsheet")
+with st.expander("📖 View All Operators", expanded=False):
+    st.markdown("""
+    This table provides a quick reference for common Google search operators and their functions.
+
+    | Operator | What it does | Example |
+    |---|---|---|
+    | `" "` | Forces exact-match searches. | `"nikola tesla"` |
+    | `OR` | Searches for results related to X or Y, not necessarily both. | `tesla OR edison` |
+    | `|` | Functions identically to "OR." | `tesla | edison` |
+    | `()` | Groups operators to control the order of execution. | `(tesla OR edison) alternating current` |
+    | `-` | Excludes terms from search results. | `tesla -motors` |
+    | `*` | Acts as a wildcard for matching any word or phrase. | `tesla "rock * roll"` |
+    | `..` | Searches within a range of numbers. | `logitech keyboard $50..$60` |
+    | `$` | Searches for specific prices. | `tesla deposit $1000` |
+    | `€` | Searches for prices in euros. | `€9.99 lunch deals` |
+    | `in` | Converts units. | `250 kph in mph` |
+    | `define:` | Searches for the definition of a word or phrase. | `define:telescope` |
+    | `filetype:` | Searches for specific types of files. | `"tesla announcements" filetype:pdf` |
+    | `ext:` | Same as filetype, searching for specific file extensions. | `azure ext:pdf` |
+    | `site:` | Searches within a specific website. | `site:goodwill.org` |
+    | `intitle:` | Searches only within page titles. | `intitle:"tesla vs edison"` |
+    | `allintitle:` | Searches for every term following "allintitle" within page titles. | `allintitle: tesla vs edison` |
+    | `inurl:` | Looks for words or phrases within a URL. | `tesla announcements inurl:2024` |
+    | `allinurl:` | Searches the URL for every term following "allinurl." | `allinurl: amazon field-keywords nikon` |
+    | `intext:` | Searches for words or phrases within the body text of a document. | `intext:"orbi vs eero vs google wifi"` |
+    | `allintext:` | Searches the body text for every term following "allintext." | `allintext: orbi eero google wifi` |
+    | `AROUND(X)` | Finds terms within X words of each other in a text. | `tesla AROUND(3) edison` |
+    | `weather:` | Searches for the weather in a specified location. | `weather:New Jersey` |
+    | `stocks:` | Searches for stock information using a ticker symbol. | `stocks:nvidia` |
+    | `map:` | Forces Google to show map results for a location. | `map:Manhattan` |
+    | `movie:` | Searches for information about a specific movie. | `movie:Oppenheimer` |
+    | `source:` | Searches for news from a specific source. | `deepseek source:cnn` |
+    | `before:` | Searches for results before a specific date. | `Microsoft before:2010-05-08` |
+    | `after:` | Searches for results after a specific date. | `Microsoft after:2010-05-08` |
+    | `cache:` | Displays Google's cached version of a web page. | `cache:example.com` |
+    | `info:` | Presents information about a web page. | `info:example.com` |
+    | `related:` | Finds sites related to a specified domain. | `related:nytimes.com` |
+    """)
 
 st.markdown("---")
 
