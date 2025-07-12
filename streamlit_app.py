@@ -1,6 +1,7 @@
 import streamlit as st
 import urllib.parse
 from datetime import datetime
+import re
 
 # --- Streamlit Page Configuration ---
 st.set_page_config(
@@ -16,6 +17,15 @@ def open_google_search(query):
     encoded_query = urllib.parse.quote_plus(query)
     google_url = f"https://www.google.com/search?q={encoded_query}"
     st.markdown(f'<a href="{google_url}" target="_blank" class="button-link">Open in Google Search</a>', unsafe_allow_html=True)
+
+# --- Helper Function for Basic Domain Validation ---
+def is_valid_domain(domain):
+    """Checks if the input string is a plausible domain."""
+    if not domain:
+        return True # Allow empty, as it's optional in some cases
+    # Simple regex for domain: at least one word character, followed by a dot, then another word character
+    # This is not exhaustive but catches common errors like just "http://"
+    return re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", domain) is not None
 
 # --- Custom CSS for Styling (Optional but Recommended for Buttons) ---
 st.markdown("""
@@ -82,7 +92,7 @@ st.markdown(
 
 # --- General Query Builder ---
 st.header("General Query Builder")
-with st.expander("Build Your Custom Query", expanded=True):
+with st.expander("🛠️ Build Your Custom Query", expanded=True):
     st.markdown("Combine various operators and keywords to create highly specific searches.")
 
     col1, col2 = st.columns(2)
@@ -100,8 +110,30 @@ with st.expander("Build Your Custom Query", expanded=True):
         before_date = st.date_input("Before Date (YYYY-MM-DD)", value=None, key="gen_before")
         after_date = st.date_input("After Date (YYYY-MM-DD)", value=None, key="gen_after")
         related_site = st.text_input("Related Site (e.g., example.com)", key="gen_related")
+        
+        # New: AROUND(X) operator
+        st.markdown("---")
+        st.subheader("AROUND(X) Operator")
+        around_term1 = st.text_input("AROUND(X) - Term 1", key="gen_around_term1")
+        around_term2 = st.text_input("AROUND(X) - Term 2", key="gen_around_term2")
+        around_x = st.number_input("AROUND(X) - X (number of words apart)", min_value=1, value=5, key="gen_around_x")
+
+        # New: cache: operator
+        st.markdown("---")
+        st.subheader("Cache Operator")
+        cache_url = st.text_input("Cache URL (e.g., example.com/page)", key="gen_cache_url")
+
 
     generated_query_parts = []
+    
+    # Input validation for domains
+    if site_domain and not is_valid_domain(site_domain):
+        st.warning("Invalid format for 'Site' domain. Please enter a valid domain (e.g., example.com).")
+        site_domain = "" # Clear invalid input
+    if related_site and not is_valid_domain(related_site):
+        st.warning("Invalid format for 'Related Site' domain. Please enter a valid domain (e.g., example.com).")
+        related_site = "" # Clear invalid input
+
     if keywords:
         generated_query_parts.append(keywords)
     if site_domain:
@@ -129,6 +161,17 @@ with st.expander("Build Your Custom Query", expanded=True):
         generated_query_parts.append(f"after:{after_date.strftime('%Y-%m-%d')}")
     if related_site:
         generated_query_parts.append(f"related:{related_site}")
+    
+    # Add AROUND(X) to query
+    if around_term1 and around_term2:
+        generated_query_parts.append(f"\"{around_term1}\" AROUND({around_x}) \"{around_term2}\"")
+    elif around_term1 or around_term2:
+        st.warning("For AROUND(X), please provide both terms.")
+
+    # Add cache: to query
+    if cache_url:
+        generated_query_parts.append(f"cache:{cache_url}")
+
 
     general_query = " ".join(generated_query_parts).strip()
 
@@ -146,43 +189,50 @@ st.markdown("---")
 st.header("Specific Use Cases")
 
 # --- 1. Find Possible Indexing Issues ---
-with st.expander("1. Find Possible Indexing Issues"):
+with st.expander("🕸️ 1. Find Possible Indexing Issues"):
     st.markdown("Check how many pages of your site Google has indexed.")
     indexing_domain = st.text_input("Your Website Domain (e.g., yoursite.com)", key="indexing_domain")
+    
     if st.button("Generate Query for Indexing", key="indexing_button"):
         if indexing_domain:
-            query = f"site:{indexing_domain}"
-            st.code(query)
-            open_google_search(query)
+            if not is_valid_domain(indexing_domain):
+                st.warning("Invalid format for domain. Please enter a valid domain (e.g., yoursite.com).")
+            else:
+                query = f"site:{indexing_domain}"
+                st.code(query)
+                open_google_search(query)
         else:
             st.warning("Please enter a domain.")
 
 # --- 2. Find and Analyze Your Competitors ---
-with st.expander("2. Find and Analyze Your Competitors"):
+with st.expander("⚔️ 2. Find and Analyze Your Competitors"):
     st.markdown("Discover similar sites or find competitors targeting specific keywords.")
     comp_domain = st.text_input("Competitor Domain (for 'related:' operator, e.g., competitor.com)", key="comp_domain")
     comp_keywords = st.text_input("Keywords for InTitle/InText (e.g., 'digital marketing')", key="comp_keywords")
     comp_intitle_checkbox = st.checkbox("Use intitle: for keywords", key="comp_intitle_checkbox")
 
     if st.button("Generate Query for Competitors", key="competitors_button"):
-        query_parts = []
-        if comp_domain:
-            query_parts.append(f"related:{comp_domain}")
-        if comp_keywords:
-            if comp_intitle_checkbox:
-                query_parts.append(f"intitle:\"{comp_keywords}\"")
-            else:
-                query_parts.append(comp_keywords)
-        
-        query = " ".join(query_parts).strip()
-        if query:
-            st.code(query)
-            open_google_search(query)
+        if comp_domain and not is_valid_domain(comp_domain):
+            st.warning("Invalid format for 'Competitor Domain'. Please enter a valid domain (e.g., competitor.com).")
         else:
-            st.warning("Please enter at least a competitor domain or keywords.")
+            query_parts = []
+            if comp_domain:
+                query_parts.append(f"related:{comp_domain}")
+            if comp_keywords:
+                if comp_intitle_checkbox:
+                    query_parts.append(f"intitle:\"{comp_keywords}\"")
+                else:
+                    query_parts.append(comp_keywords)
+            
+            query = " ".join(query_parts).strip()
+            if query:
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter at least a competitor domain or keywords.")
 
 # --- 3. Find Guest Post Opportunities ---
-with st.expander("3. Find Guest Post Opportunities"):
+with st.expander("✍️ 3. Find Guest Post Opportunities"):
     st.markdown("Find websites in your niche that accept guest contributions.")
     guest_niche = st.text_input("Your Niche/Keywords (e.g., 'content marketing')", key="guest_niche")
     guest_phrases = st.multiselect(
@@ -201,7 +251,7 @@ with st.expander("3. Find Guest Post Opportunities"):
             st.warning("Please enter a niche and select at least one phrase.")
 
 # --- 4. Find Resource Page Opportunities ---
-with st.expander("4. Find Resource Page Opportunities"):
+with st.expander("📚 4. Find Resource Page Opportunities"):
     st.markdown("Identify pages that list external resources, potentially for backlink opportunities.")
     resource_topic = st.text_input("Your Topic (e.g., 'SEO tools')", key="resource_topic")
     if st.button("Generate Query for Resource Pages", key="resource_page_button"):
@@ -213,7 +263,7 @@ with st.expander("4. Find Resource Page Opportunities"):
             st.warning("Please enter a topic.")
 
 # --- 5. Find Files You Don’t Want in Google’s Index ---
-with st.expander("5. Find Files You Don’t Want in Google’s Index"):
+with st.expander("🚫 5. Find Files You Don’t Want in Google’s Index"):
     st.markdown("Locate unintended file types (e.g., sensitive documents) indexed on your site.")
     file_site = st.text_input("Your Site Domain (e.g., yoursite.com)", key="file_site")
     file_types = st.multiselect(
@@ -223,7 +273,9 @@ with st.expander("5. Find Files You Don’t Want in Google’s Index"):
         key="file_types"
     )
     if st.button("Generate Query for Unwanted Files", key="unwanted_files_button"):
-        if file_site and file_types:
+        if file_site and not is_valid_domain(file_site):
+            st.warning("Invalid format for 'Your Site Domain'. Please enter a valid domain (e.g., yoursite.com).")
+        elif file_site and file_types:
             filetype_query = " | ".join([f"filetype:{ft}" for ft in file_types])
             query = f"site:{file_site} ({filetype_query})"
             st.code(query)
@@ -232,12 +284,14 @@ with st.expander("5. Find Files You Don’t Want in Google’s Index"):
             st.warning("Please enter a domain and select at least one file type.")
 
 # --- 6. Find Opportunities to Add Internal Links ---
-with st.expander("6. Find Opportunities to Add Internal Links"):
+with st.expander("🔗 6. Find Opportunities to Add Internal Links"):
     st.markdown("Discover pages on your site that could link to a target page or topic.")
     internal_link_site = st.text_input("Your Blog/Site URL (e.g., yoursite.com/blog)", key="internal_link_site")
     internal_link_keyword = st.text_input("Target Keyword/Phrase (e.g., 'content strategy')", key="internal_link_keyword")
     if st.button("Generate Query for Internal Links", key="internal_links_button"):
-        if internal_link_site and internal_link_keyword:
+        if internal_link_site and not is_valid_domain(internal_link_site): # Basic check for URL-like input
+            st.warning("Invalid format for 'Your Blog/Site URL'. Please enter a valid domain or URL (e.g., yoursite.com/blog).")
+        elif internal_link_site and internal_link_keyword:
             query = f"site:{internal_link_site} \"{internal_link_keyword}\""
             st.code(query)
             open_google_search(query)
@@ -245,7 +299,7 @@ with st.expander("6. Find Opportunities to Add Internal Links"):
             st.warning("Please enter your site URL and a target keyword.")
 
 # --- 7. Find “Best” Listicles that Don’t Mention Your Brand ---
-with st.expander("7. Find “Best” Listicles that Don’t Mention Your Brand"):
+with st.expander("🏆 7. Find “Best” Listicles that Don’t Mention Your Brand"):
     st.markdown("Identify 'best of' lists that could be opportunities for your brand to be included.")
     your_brand = st.text_input("Your Brand Name (e.g., 'MyAwesomeTool')", key="your_brand")
     listicle_topic = st.text_input("Topic Keyword (e.g., 'project management software')", key="listicle_topic")
@@ -258,7 +312,7 @@ with st.expander("7. Find “Best” Listicles that Don’t Mention Your Brand")
             st.warning("Please enter your brand name and a topic.")
 
 # --- 8. Find Websites that Have Reviewed Competitors ---
-with st.expander("8. Find Websites that Have Reviewed Competitors"):
+with st.expander("⭐ 8. Find Websites that Have Reviewed Competitors"):
     st.markdown("Find sites that have reviewed your competitors, indicating potential review opportunities for your brand.")
     competitor_brands_input = st.text_area("Competitor Brand Names (one per line)", key="competitor_brands_input")
     if st.button("Generate Query for Competitor Reviews", key="competitor_reviews_button"):
@@ -272,7 +326,7 @@ with st.expander("8. Find Websites that Have Reviewed Competitors"):
             st.warning("Please enter at least one competitor brand name.")
 
 # --- 9. Find Relevant Quora and Reddit Questions to Answer ---
-with st.expander("9. Find Relevant Quora and Reddit Questions to Answer"):
+with st.expander("💬 9. Find Relevant Quora and Reddit Questions to Answer"):
     st.markdown("Discover questions on popular forums related to your topics for content ideas or direct engagement.")
     qa_topics_input = st.text_input("Topic Keywords (comma-separated, e.g., 'AI, machine learning')", key="qa_topics_input")
     if st.button("Generate Query for Q&A Sites", key="qa_sites_button"):
@@ -286,25 +340,43 @@ with st.expander("9. Find Relevant Quora and Reddit Questions to Answer"):
             st.warning("Please enter topic keywords.")
 
 # --- 10. Find How Fast Your Competitors are Publishing New Content ---
-with st.expander("10. Find How Fast Your Competitors are Publishing New Content"):
+with st.expander("⚡ 10. Find How Fast Your Competitors are Publishing New Content"):
     st.markdown("Monitor competitor content publication frequency within a specific timeframe.")
     comp_content_domain = st.text_input("Competitor Domain (e.g., competitorblog.com)", key="comp_content_domain")
     content_after_date = st.date_input("Published After Date", value=None, key="content_after_date")
     content_before_date = st.date_input("Published Before Date", value=None, key="content_before_date")
 
     if st.button("Generate Query for Competitor Content Speed", key="comp_content_speed_button"):
-        query_parts = [f"site:{comp_content_domain}"]
-        if content_after_date:
-            query_parts.append(f"after:{content_after_date.strftime('%Y-%m-%d')}")
-        if content_before_date:
-            query_parts.append(f"before:{content_before_date.strftime('%Y-%m-%d')}")
-        
-        query = " ".join(query_parts).strip()
-        if query_parts:
-            st.code(query)
-            open_google_search(query)
+        if comp_content_domain and not is_valid_domain(comp_content_domain):
+            st.warning("Invalid format for 'Competitor Domain'. Please enter a valid domain (e.g., competitorblog.com).")
         else:
-            st.warning("Please enter a competitor domain and at least one date.")
+            query_parts = [f"site:{comp_content_domain}"]
+            if content_after_date:
+                query_parts.append(f"after:{content_after_date.strftime('%Y-%m-%d')}")
+            if content_before_date:
+                query_parts.append(f"before:{content_before_date.strftime('%Y-%m-%d')}")
+            
+            query = " ".join(query_parts).strip()
+            if query_parts:
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter a competitor domain and at least one date.")
+
+st.markdown("---")
+
+# --- User Feedback Section ---
+st.header("Feedback & Suggestions")
+st.markdown("Help us improve Google SEO Scout! Share your thoughts or suggest new operator combinations.")
+with st.form("feedback_form"):
+    feedback_text = st.text_area("Your Feedback", height=100)
+    submit_feedback = st.form_submit_button("Submit Feedback")
+    if submit_feedback:
+        if feedback_text:
+            st.success("Thank you for your feedback! We appreciate your input.")
+            # In a real application, you would store this feedback (e.g., to a database, email, or file)
+        else:
+            st.warning("Please enter some feedback before submitting.")
 
 st.markdown("---")
 st.info(
