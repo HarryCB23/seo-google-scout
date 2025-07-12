@@ -6,7 +6,7 @@ import re
 # --- Streamlit Page Configuration ---
 st.set_page_config(
     page_title="Google SEO Scout",
-    page_icon="�",
+    page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -25,7 +25,8 @@ def is_valid_domain(domain):
         return True # Allow empty, as it's optional in some cases
     # Simple regex for domain: at least one word character, followed by a dot, then another word character
     # This is not exhaustive but catches common errors like just "http://"
-    return re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", domain) is not None
+    # Updated regex to be a bit more robust for common domain patterns
+    return re.match(r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$", domain) is not None
 
 # --- Custom CSS for Styling (Optional but Recommended for Buttons) ---
 st.markdown("""
@@ -135,7 +136,7 @@ st.markdown("---")
 # --- Specific Use Cases (Now a Dropdown) ---
 st.header("Specific Use Cases")
 use_case_options = {
-    "Select a Use Case": None,
+    "Select a Use Case": None, # Default option
     "🕸️ 1. Find Possible Indexing Issues": "indexing_issues",
     "⚔️ 2. Find and Analyze Your Competitors": "analyze_competitors",
     "✍️ 3. Find Guest Post Opportunities": "guest_post_opportunities",
@@ -151,7 +152,7 @@ use_case_options = {
     "🧑‍💻 13. Find Prolific Guest Bloggers": "prolific_guest_bloggers",
     "📈 14. Find Competitor's Top Pages for a Keyword": "competitor_top_pages",
     "🔢 15. Find Content in a Numeric Range": "numeric_range",
-    "📄 16. Find Credible Sources for Articles": "credible_sources"
+    "� 16. Find Credible Sources for Articles": "credible_sources"
 }
 
 selected_use_case_display = st.selectbox(
@@ -161,6 +162,7 @@ selected_use_case_display = st.selectbox(
 )
 selected_use_case_id = use_case_options[selected_use_case_display]
 
+# Conditional rendering for each use case
 if selected_use_case_id == "indexing_issues":
     st.subheader("🕸️ Find Possible Indexing Issues")
     st.markdown("Check how many pages of your site Google has indexed.")
@@ -461,38 +463,38 @@ elif selected_use_case_id == "credible_sources":
 
 st.markdown("---")
 
-# --- General Query Builder (Moved down) ---
+# --- General Query Builder (Moved to bottom) ---
 st.header("General Query Builder")
 with st.expander("🛠️ Build Your Custom Query", expanded=True):
     st.markdown("Combine various operators and keywords to create highly specific searches.")
 
     col1, col2 = st.columns(2)
     with col1:
-        keywords = st.text_input("General Keywords (e.g., 'SEO tips')", key="gen_keywords_moved")
-        site_domain = st.text_input("Site (e.g., example.com)", key="gen_site_moved")
-        intitle_phrase = st.text_input("InTitle (exact phrase, e.g., 'write for us')", key="gen_intitle_moved")
-        inurl_phrase = st.text_input("InURL (exact phrase, e.g., 'guest-post')", key="gen_inurl_moved")
-        filetype_ext = st.text_input("Filetype (e.g., pdf, doc, xls)", key="gen_filetype_moved")
+        keywords = st.text_input("General Keywords (e.g., 'SEO tips')", key="gen_keywords_final")
+        site_domain = st.text_input("Site (e.g., example.com)", key="gen_site_final")
+        intitle_phrase = st.text_input("InTitle (exact phrase, e.g., 'write for us')", key="gen_intitle_final")
+        inurl_phrase = st.text_input("InURL (exact phrase, e.g., 'guest-post')", key="gen_inurl_final")
+        filetype_ext = st.text_input("Filetype (e.g., pdf, doc, xls)", key="gen_filetype_final")
 
     with col2:
-        exact_match_phrase = st.text_input("Exact Match Phrase (\"...\")", key="gen_exact_match_moved")
-        exclude_term = st.text_input("Exclude Term (-term)", key="gen_exclude_moved")
-        or_terms = st.text_input("OR Terms (term1 | term2)", help="Use '|' for OR, e.g., 'marketing | SEO'", key="gen_or_moved")
-        before_date = st.date_input("Before Date (YYYY-MM-DD)", value=None, key="gen_before_moved")
-        after_date = st.date_input("After Date (YYYY-MM-DD)", value=None, key="gen_after_moved")
-        related_site = st.text_input("Related Site (e.g., example.com)", key="gen_related_moved")
+        exact_match_phrase = st.text_input("Exact Match Phrase (\"...\")", key="gen_exact_match_final")
+        exclude_term = st.text_input("Exclude Term (-term)", key="gen_exclude_final")
+        or_terms = st.text_input("OR Terms (term1 | term2)", help="Use '|' for OR, e.g., 'marketing | SEO'", key="gen_or_final")
+        before_date = st.date_input("Before Date (YYYY-MM-DD)", value=None, key="gen_before_final")
+        after_date = st.date_input("After Date (YYYY-MM-DD)", value=None, key="gen_after_final")
+        related_site = st.text_input("Related Site (e.g., example.com)", key="gen_related_final")
         
         # AROUND(X) operator
         st.markdown("---")
         st.subheader("AROUND(X) Operator")
-        around_term1 = st.text_input("AROUND(X) - Term 1", key="gen_around_term1_moved")
-        around_term2 = st.text_input("AROUND(X) - Term 2", key="gen_around_term2_moved")
-        around_x = st.number_input("AROUND(X) - X (number of words apart)", min_value=1, value=5, key="gen_around_x_moved")
+        around_term1 = st.text_input("AROUND(X) - Term 1", key="gen_around_term1_final")
+        around_term2 = st.text_input("AROUND(X) - Term 2", key="gen_around_term2_final")
+        around_x = st.number_input("AROUND(X) - X (number of words apart)", min_value=1, value=5, key="gen_around_x_final")
 
         # cache: operator
         st.markdown("---")
         st.subheader("Cache Operator")
-        cache_url = st.text_input("Cache URL (e.g., example.com/page)", key="gen_cache_url_moved")
+        cache_url = st.text_input("Cache URL (e.g., example.com/page)", key="gen_cache_url_final")
 
 
     generated_query_parts = []
@@ -550,7 +552,7 @@ with st.expander("🛠️ Build Your Custom Query", expanded=True):
     st.subheader("Generated Query:")
     st.code(general_query if general_query else "Your query will appear here as you add operators.")
 
-    if st.button("Open General Query in Google", key="open_general_query_moved"):
+    if st.button("Open General Query in Google", key="open_general_query_final"):
         if general_query:
             open_google_search(general_query)
         else:
@@ -576,4 +578,3 @@ st.info(
     "**Note:** Google's search results and operator behavior can change over time. "
     "This tool generates the query string; the actual search results are provided by Google."
 )
-�
