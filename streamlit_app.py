@@ -1,7 +1,7 @@
 import streamlit as st
 import urllib.parse
-from datetime import datetime
 import re
+from datetime import datetime
 
 # --- Streamlit Page Configuration ---
 st.set_page_config(
@@ -90,12 +90,10 @@ tabs = st.tabs([
 # --- Tab 1: Cheatsheet ---
 with tabs[0]:
     st.title("🔍 Google SEO Scout")
-    st.markdown(
-        """
+    st.markdown("""
         Welcome to **Google SEO Scout**! This app helps you build powerful Google search queries using advanced search operators.
         Effortlessly find indexing issues, analyze competitors, discover content opportunities, and more.
-        """
-    )
+        """)
     st.header("Google Search Operators Cheatsheet")
     with st.expander("📖 View All Operators", expanded=True):
         st.markdown("""
@@ -137,89 +135,133 @@ with tabs[0]:
 # --- Tab 2: Specific Use Cases ---
 with tabs[1]:
     st.header("Specific Use Cases")
-    # ... (see previous message for full logic on use case selection) ...
+    st.markdown("""
+        Choose a use case to quickly generate a targeted Google search query.
+        """)
+    use_cases = {
+        "Find Guest Post Opportunities": {
+            "keywords": "guest post",
+            "inurl": "guest-post",
+            "site": "",
+            "intitle": "write for us"
+        },
+        "Check Site Indexing": {
+            "keywords": "",
+            "site": st.text_input("Domain to check index status (example.com)", key="idx_site"),
+            "inurl": "",
+            "intitle": ""
+        },
+        "Competitor Content Analysis": {
+            "keywords": st.text_input("Competitor keywords", key="comp_keywords"),
+            "site": st.text_input("Competitor domain (example.com)", key="comp_site"),
+            "inurl": "",
+            "intitle": ""
+        },
+        "Discover PDF Resources": {
+            "keywords": st.text_input("Topic for PDFs", key="pdf_keywords"),
+            "filetype": "pdf",
+            "site": "",
+            "intitle": ""
+        },
+        "Custom": {}
+    }
+    selected_case = st.selectbox("Choose a use case", list(use_cases.keys()), index=0)
+    query_parts = []
+
+    if selected_case != "Custom":
+        case = use_cases[selected_case]
+        # Only show relevant fields for this case
+        for op in ["keywords", "site", "inurl", "intitle", "filetype"]:
+            val = case.get(op, "")
+            if val:
+                if op == "keywords":
+                    query_parts.append(val)
+                if op == "site" and val:
+                    query_parts.append(f"site:{val}")
+                if op == "inurl" and val:
+                    query_parts.append(f"inurl:{val}")
+                if op == "intitle" and val:
+                    query_parts.append(f'intitle:"{val}"')
+                if op == "filetype" and val:
+                    query_parts.append(f"filetype:{val}")
+    else:
+        st.info("Use the General Query Builder tab for custom combinations.")
+
+    specific_query = " ".join(query_parts).strip()
+    st.markdown("---")
+    st.subheader("Generated Query")
+    st.code(specific_query if specific_query else "Your query will appear here.")
+
+    if st.button("Open Specific Query in Google"):
+        if specific_query:
+            open_google_search(specific_query)
+        else:
+            st.warning("Please build a query first!")
 
 # --- Tab 3: General Query Builder ---
 with tabs[2]:
     st.header("General Query Builder")
-    st.markdown("Combine various operators and keywords to create highly specific searches.")
+    st.markdown("Build your custom Google search by combining operators below.")
+
+    # --- Core Search Terms ---
+    st.subheader("Core Search Terms")
+    keywords = st.text_input("Main Keyword", key="core_keywords")
+
+    # --- Domain & URL Filters ---
+    st.subheader("Domain & URL Filters")
+    site_domain = st.text_input("site: (Domain filter)", key="domain_site")
+    inurl = st.text_input("inurl: (URL keyword)", key="domain_inurl")
+    intitle = st.text_input("intitle: (Title keyword)", key="domain_intitle")
+    filetype = st.text_input("filetype: (Filetype filter)", key="domain_filetype")
+
+    # --- Inclusion & Exclusion ---
+    st.subheader("Inclusion & Exclusion")
+    exact_match = st.text_input("Exact Match (use quotes)", key="inc_exact")
+    exclude = st.text_input("Exclude terms (prefix with '-')", key="inc_exclude")
+    or_terms = st.text_input("OR terms (separate with OR)", key="inc_or")
+
+    # --- Date & Proximity ---
+    st.subheader("Date & Proximity")
+    before = st.text_input("before: (YYYY-MM-DD)", key="date_before")
+    after = st.text_input("after: (YYYY-MM-DD)", key="date_after")
+    term1 = st.text_input("AROUND(X) term 1", key="prox_term1")
+    term2 = st.text_input("AROUND(X) term 2", key="prox_term2")
+    around_x = st.number_input("AROUND(X) value", min_value=1, value=5, key="prox_x")
+
+    # --- Niche Operators (Advanced) ---
+    with st.expander("Niche Operators (Advanced)"):
+        related = st.text_input("related: (Find similar sites)", key="niche_related")
+        cache = st.text_input("cache: (View cached version)", key="niche_cache")
+
+    # --- Build query string ---
+    parts = []
+    # Core
+    if keywords: parts.append(keywords)
+    # Domain & URL
+    if site_domain: parts.append(f"site:{site_domain}")
+    if inurl: parts.append(f"inurl:{inurl}")
+    if intitle: parts.append(f'intitle:{intitle}')
+    if filetype: parts.append(f"filetype:{filetype}")
+    # Inclusion & Exclusion
+    if exact_match: parts.append(f"\"{exact_match}\"")
+    if exclude: parts.append(f"-{exclude}")
+    if or_terms: parts.append(f"({or_terms})")
+    # Date & Proximity
+    if before: parts.append(f"before:{before}")
+    if after: parts.append(f"after:{after}")
+    if term1 and term2: parts.append(f"\"{term1}\" AROUND({around_x}) \"{term2}\"")
+    # Niche Operators
+    if related: parts.append(f"related:{related}")
+    if cache: parts.append(f"cache:{cache}")
+
+    query_str = " ".join(parts)
     st.markdown("---")
-    # -- Sectioned layout --
-    col1, col2 = st.columns(2)
-    with col1:
-        keywords = st.text_input("General Keywords (e.g., 'SEO tips')", key="gen_keywords_final")
-        site_domain = st.text_input("Site (e.g., example.com)", key="gen_site_final")
-        intitle_phrase = st.text_input("InTitle (exact phrase, e.g., 'write for us')", key="gen_intitle_final")
-        inurl_phrase = st.text_input("InURL (exact phrase, e.g., 'guest-post')", key="gen_inurl_final")
-        filetype_ext = st.text_input("Filetype (e.g., pdf, doc, xls)", key="gen_filetype_final")
+    st.subheader("Generated Query")
+    st.code(query_str if query_str else "Your query will appear here as you add terms.")
 
-    with col2:
-        exact_match_phrase = st.text_input("Exact Match Phrase (\"...\")", key="gen_exact_match_final")
-        exclude_term = st.text_input("Exclude Term (-term)", key="gen_exclude_final")
-        or_terms = st.text_input("OR Terms (term1 | term2)", help="Use '|' for OR, e.g., 'marketing | SEO'", key="gen_or_final")
-        before_date = st.date_input("Before Date (YYYY-MM-DD)", value=None, key="gen_before_final")
-        after_date = st.date_input("After Date (YYYY-MM-DD)", value=None, key="gen_after_final")
-        related_site = st.text_input("Related Site (e.g., example.com)", key="gen_related_final")
-        st.markdown("---")
-        st.subheader("AROUND(X) Operator")
-        around_term1 = st.text_input("AROUND(X) - Term 1", key="gen_around_term1_final")
-        around_term2 = st.text_input("AROUND(X) - Term 2", key="gen_around_term2_final")
-        around_x = st.number_input("AROUND(X) - X (number of words apart)", min_value=1, value=5, key="gen_around_x_final")
-        st.markdown("---")
-        st.subheader("Cache Operator")
-        cache_url = st.text_input("Cache URL (e.g., example.com/page)", key="gen_cache_url_final")
-
-    generated_query_parts = []
-
-    if site_domain and not is_valid_domain(site_domain):
-        st.warning("Invalid format for 'Site' domain. Please enter a valid domain (e.g., example.com).")
-        site_domain = ""
-    if related_site and not is_valid_domain(related_site):
-        st.warning("Invalid format for 'Related Site' domain. Please enter a valid domain (e.g., example.com).")
-        related_site = ""
-
-    # --- Assemble Query ---
-    if keywords:
-        generated_query_parts.append(keywords)
-    if site_domain:
-        generated_query_parts.append(f"site:{site_domain}")
-    if intitle_phrase:
-        generated_query_parts.append(f"intitle:\"{intitle_phrase}\"")
-    if inurl_phrase:
-        generated_query_parts.append(f"inurl:\"{inurl_phrase}\"")
-    if filetype_ext:
-        generated_query_parts.append(f"filetype:{filetype_ext}")
-    if exact_match_phrase:
-        generated_query_parts.append(f"\"{exact_match_phrase}\"")
-    if exclude_term:
-        generated_query_parts.append(f"-{exclude_term}")
-    if or_terms:
-        or_list = [term.strip() for term in or_terms.split('|') if term.strip()]
-        if len(or_list) > 1:
-            generated_query_parts.append(f"({' | '.join(or_list)})")
-        elif or_list:
-            generated_query_parts.append(or_list[0])
-    if before_date:
-        generated_query_parts.append(f"before:{before_date.strftime('%Y-%m-%d')}")
-    if after_date:
-        generated_query_parts.append(f"after:{after_date.strftime('%Y-%m-%d')}")
-    if related_site:
-        generated_query_parts.append(f"related:{related_site}")
-    if around_term1 and around_term2:
-        generated_query_parts.append(f"\"{around_term1}\" AROUND({around_x}) \"{around_term2}\"")
-    elif around_term1 or around_term2:
-        st.warning("For AROUND(X), please provide both terms.")
-    if cache_url:
-        generated_query_parts.append(f"cache:{cache_url}")
-
-    general_query = " ".join(generated_query_parts).strip()
-    st.markdown("---")
-    st.subheader("Generated Query:")
-    st.code(general_query if general_query else "Your query will appear here as you add operators.")
-
-    if st.button("Open General Query in Google", key="open_general_query_final"):
-        if general_query:
-            open_google_search(general_query)
+    if st.button("Open General Query in Google"):
+        if query_str:
+            open_google_search(query_str)
         else:
             st.warning("Please build a query first!")
 
