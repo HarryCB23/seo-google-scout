@@ -137,55 +137,48 @@ with tabs[1]:
     st.header("Specific Use Cases")
     st.markdown("""
         Choose a use case to quickly generate a targeted Google search query.
-        """)
-    use_cases = {
-        "Find Guest Post Opportunities": {
-            "keywords": "guest post",
-            "inurl": "guest-post",
-            "site": "",
-            "intitle": "write for us"
-        },
-        "Check Site Indexing": {
-            "keywords": "",
-            "site": st.text_input("Domain to check index status (example.com)", key="idx_site"),
-            "inurl": "",
-            "intitle": ""
-        },
-        "Competitor Content Analysis": {
-            "keywords": st.text_input("Competitor keywords", key="comp_keywords"),
-            "site": st.text_input("Competitor domain (example.com)", key="comp_site"),
-            "inurl": "",
-            "intitle": ""
-        },
-        "Discover PDF Resources": {
-            "keywords": st.text_input("Topic for PDFs", key="pdf_keywords"),
-            "filetype": "pdf",
-            "site": "",
-            "intitle": ""
-        },
-        "Custom": {}
-    }
-    selected_case = st.selectbox("Choose a use case", list(use_cases.keys()), index=0)
-    query_parts = []
+    """)
 
-    if selected_case != "Custom":
-        case = use_cases[selected_case]
-        # Only show relevant fields for this case
-        for op in ["keywords", "site", "inurl", "intitle", "filetype"]:
-            val = case.get(op, "")
-            if val:
-                if op == "keywords":
-                    query_parts.append(val)
-                if op == "site" and val:
-                    query_parts.append(f"site:{val}")
-                if op == "inurl" and val:
-                    query_parts.append(f"inurl:{val}")
-                if op == "intitle" and val:
-                    query_parts.append(f'intitle:"{val}"')
-                if op == "filetype" and val:
-                    query_parts.append(f"filetype:{val}")
-    else:
+    use_case_options = [
+        "Find Guest Post Opportunities",
+        "Check Site Indexing",
+        "Competitor Content Analysis",
+        "Discover PDF Resources",
+        "Custom"
+    ]
+    selected_case = st.selectbox("Choose a use case", use_case_options)
+
+    # Default values
+    keywords, site, inurl, intitle, filetype = "", "", "", "", ""
+
+    if selected_case == "Find Guest Post Opportunities":
+        st.markdown("**Find Guest Post Opportunities**")
+        site = st.text_input("Domain to target (optional, e.g. example.com)", key="gp_site")
+        keywords = st.text_input("Keywords", value="guest post", key="gp_keywords")
+        inurl = "guest-post"
+        intitle = "write for us"
+    elif selected_case == "Check Site Indexing":
+        st.markdown("**Check Site Indexing**")
+        site = st.text_input("Domain to check index status (e.g. example.com)", key="idx_site")
+        keywords = ""
+    elif selected_case == "Competitor Content Analysis":
+        st.markdown("**Competitor Content Analysis**")
+        site = st.text_input("Competitor domain (e.g. example.com)", key="comp_site")
+        keywords = st.text_input("Competitor keywords", key="comp_keywords")
+    elif selected_case == "Discover PDF Resources":
+        st.markdown("**Discover PDF Resources**")
+        keywords = st.text_input("Topic for PDFs", key="pdf_keywords")
+        filetype = "pdf"
+        site = st.text_input("Domain to target (optional, e.g. example.com)", key="pdf_site")
+    elif selected_case == "Custom":
         st.info("Use the General Query Builder tab for custom combinations.")
+
+    query_parts = []
+    if keywords: query_parts.append(keywords)
+    if site: query_parts.append(f"site:{site}")
+    if inurl: query_parts.append(f"inurl:{inurl}")
+    if intitle: query_parts.append(f'intitle:"{intitle}"')
+    if filetype: query_parts.append(f"filetype:{filetype}")
 
     specific_query = " ".join(query_parts).strip()
     st.markdown("---")
