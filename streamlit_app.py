@@ -152,7 +152,10 @@ use_case_options = {
     "🧑‍💻 13. Find Prolific Guest Bloggers": "prolific_guest_bloggers",
     "📈 14. Find Competitor's Top Pages for a Keyword": "competitor_top_pages",
     "🔢 15. Find Content in a Numeric Range": "numeric_range",
-    "� 16. Find Credible Sources for Articles": "credible_sources"
+    "📄 16. Find Credible Sources for Articles": "credible_sources",
+    "📊 17. Find Infographic Submission Opportunities": "infographic_submission", # New
+    "👤 18. Find Social Profiles for Outreach": "social_profiles", # New
+    "🗣️ 19. Join Social Conversations on Forums": "social_conversations" # New
 }
 
 selected_use_case_display = st.selectbox(
@@ -207,7 +210,7 @@ elif selected_use_case_id == "analyze_competitors":
                 st.warning("Please enter at least a competitor domain or keywords.")
 
 elif selected_use_case_id == "guest_post_opportunities":
-    st.subheader("✍️ Find Guest Post Opportunities")
+    st.subheader("✍️ 3. Find Guest Post Opportunities")
     st.markdown("Find websites in your niche that accept guest contributions.")
     guest_niche = st.text_input("Your Niche/Keywords (e.g., 'content marketing')", key="guest_niche")
     guest_phrases = st.multiselect(
@@ -226,7 +229,7 @@ elif selected_use_case_id == "guest_post_opportunities":
             st.warning("Please enter a niche and select at least one phrase.")
 
 elif selected_use_case_id == "resource_page_opportunities":
-    st.subheader("📚 Find Resource Page Opportunities")
+    st.subheader("📚 4. Find Resource Page Opportunities")
     st.markdown("Identify pages that list external resources, potentially for backlink opportunities.")
     resource_topic = st.text_input("Your Topic (e.g., 'SEO tools')", key="resource_topic")
     if st.button("Generate Query for Resource Pages", key="resource_page_button"):
@@ -238,7 +241,7 @@ elif selected_use_case_id == "resource_page_opportunities":
             st.warning("Please enter a topic.")
 
 elif selected_use_case_id == "specific_file_types":
-    st.subheader("📄 Find Specific File Types on a Site")
+    st.subheader("📄 5. Find Specific File Types on a Site")
     st.markdown("Locate specific file types (e.g., PDFs, presentations) on a given site or broadly.")
     file_search_scope = st.radio(
         "Search Scope",
@@ -280,7 +283,7 @@ elif selected_use_case_id == "specific_file_types":
             open_google_search(query)
 
 elif selected_use_case_id == "internal_linking":
-    st.subheader("🔗 Find Opportunities to Add Internal Links")
+    st.subheader("🔗 6. Find Opportunities to Add Internal Links")
     st.markdown("Discover pages on your site that could link to a target page or topic.")
     internal_link_site = st.text_input("Your Blog/Site URL (e.g., yoursite.com/blog)", key="internal_link_site")
     internal_link_keyword = st.text_input("Target Keyword/Phrase (e.g., 'content strategy')", key="internal_link_keyword")
@@ -295,7 +298,7 @@ elif selected_use_case_id == "internal_linking":
             st.warning("Please enter your site URL and a target keyword.")
 
 elif selected_use_case_id == "best_listicles":
-    st.subheader("🏆 Find “Best” Listicles that Don’t Mention Your Brand")
+    st.subheader("🏆 7. Find “Best” Listicles that Don’t Mention Your Brand")
     st.markdown("Identify 'best of' lists that could be opportunities for your brand to be included.")
     your_brand = st.text_input("Your Brand Name (e.g., 'MyAwesomeTool')", key="your_brand")
     listicle_topic = st.text_input("Topic Keyword (e.g., 'project management software')", key="listicle_topic")
@@ -308,7 +311,7 @@ elif selected_use_case_id == "best_listicles":
             st.warning("Please enter your brand name and a topic.")
 
 elif selected_use_case_id == "competitor_reviews":
-    st.subheader("⭐ Find Websites that Have Reviewed Competitors")
+    st.subheader("⭐ 8. Find Websites that Have Reviewed Competitors")
     st.markdown("Find sites that have reviewed your competitors, indicating potential review opportunities for your brand.")
     competitor_brands_input = st.text_area("Competitor Brand Names (one per line)", key="competitor_brands_input")
     if st.button("Generate Query for Competitor Reviews", key="competitor_reviews_button"):
@@ -322,7 +325,7 @@ elif selected_use_case_id == "competitor_reviews":
             st.warning("Please enter at least one competitor brand name.")
 
 elif selected_use_case_id == "qa_sites":
-    st.subheader("💬 Find Relevant Quora and Reddit Questions to Answer")
+    st.subheader("💬 9. Find Relevant Quora and Reddit Questions to Answer")
     st.markdown("Discover questions on popular forums related to your topics for content ideas or direct engagement.")
     qa_topics_input = st.text_input("Topic Keywords (comma-separated, e.g., 'AI, machine learning')", key="qa_topics_input")
     if st.button("Generate Query for Q&A Sites", key="qa_sites_button"):
@@ -336,7 +339,7 @@ elif selected_use_case_id == "qa_sites":
             st.warning("Please enter topic keywords.")
 
 elif selected_use_case_id == "competitor_content_speed":
-    st.subheader("⚡ Find How Fast Your Competitors are Publishing New Content")
+    st.subheader("⚡ 10. Find How Fast Your Competitors are Publishing New Content")
     st.markdown("Monitor competitor content publication frequency within a specific timeframe.")
     comp_content_domain = st.text_input("Competitor Domain (e.g., competitorblog.com)", key="comp_content_domain")
     content_after_date = st.date_input("Published After Date", value=None, key="content_after_date")
@@ -360,7 +363,7 @@ elif selected_use_case_id == "competitor_content_speed":
                 st.warning("Please enter a competitor domain and at least one date.")
 
 elif selected_use_case_id == "non_secure_pages":
-    st.subheader("🔒 Find Non-Secure Pages")
+    st.subheader("🔒 11. Find Non-Secure Pages")
     st.markdown("Identify pages on your site that are not using HTTPS.")
     non_secure_domain = st.text_input("Your Website Domain (e.g., yoursite.com)", key="non_secure_domain")
     if st.button("Generate Query for Non-Secure Pages", key="non_secure_button"):
@@ -375,7 +378,7 @@ elif selected_use_case_id == "non_secure_pages":
             st.warning("Please enter a domain.")
 
 elif selected_use_case_id == "plagiarized_content":
-    st.subheader("📝 Find Plagiarized Content")
+    st.subheader("📝 12. Find Plagiarized Content")
     st.markdown("Search for exact matches of your content across the web to detect plagiarism.")
     plagiarism_text = st.text_area("Exact text snippet to search for (e.g., a sentence or paragraph from your content)", key="plagiarism_text")
     if st.button("Generate Query for Plagiarized Content", key="plagiarism_button"):
@@ -387,7 +390,7 @@ elif selected_use_case_id == "plagiarized_content":
             st.warning("Please enter a text snippet.")
 
 elif selected_use_case_id == "prolific_guest_bloggers":
-    st.subheader("🧑‍💻 Find Prolific Guest Bloggers")
+    st.subheader("🧑‍💻 13. Find Prolific Guest Bloggers")
     st.markdown("Discover authors who frequently publish guest posts in your niche.")
     blogger_niche = st.text_input("Niche/Keywords (e.g., 'SEO')", key="blogger_niche")
     specific_author = st.text_input("Specific Author Name (optional, e.g., 'neil patel')", key="specific_author")
@@ -411,7 +414,7 @@ elif selected_use_case_id == "prolific_guest_bloggers":
             st.warning("Please enter a niche/keywords.")
 
 elif selected_use_case_id == "competitor_top_pages":
-    st.subheader("📈 Find Competitor's Top Pages for a Keyword")
+    st.subheader("📈 14. Find Competitor's Top Pages for a Keyword")
     st.markdown("Identify popular pages on a competitor's site related to a specific keyword or topic.")
     comp_top_pages_domain = st.text_input("Competitor Domain (e.g., moz.com)", key="comp_top_pages_domain")
     comp_top_pages_keyword = st.text_input("Keyword/Topic in URL (e.g., 'link building')", key="comp_top_pages_keyword")
@@ -426,7 +429,7 @@ elif selected_use_case_id == "competitor_top_pages":
             st.warning("Please enter both competitor domain and a keyword/topic.")
 
 elif selected_use_case_id == "numeric_range":
-    st.subheader("🔢 Find Content in a Numeric Range")
+    st.subheader("🔢 15. Find Content in a Numeric Range")
     st.markdown("Search for content containing numbers within a specified range (e.g., prices, years).")
     numeric_keywords = st.text_input("Keywords (e.g., 'best laptops')", key="numeric_keywords")
     min_value = st.number_input("Minimum Value", min_value=0, value=10, key="min_value")
@@ -443,7 +446,7 @@ elif selected_use_case_id == "numeric_range":
             open_google_search(query)
 
 elif selected_use_case_id == "credible_sources":
-    st.subheader("📄 Find Credible Sources for Articles")
+    st.subheader("� 16. Find Credible Sources for Articles")
     st.markdown("Locate academic papers, reports, or presentations in specific file formats for research.")
     source_keywords = st.text_input("Keywords for Research (e.g., 'LLM training data')", key="source_keywords")
     source_file_types = st.multiselect(
@@ -460,6 +463,79 @@ elif selected_use_case_id == "credible_sources":
             open_google_search(query)
         else:
             st.warning("Please enter keywords and select at least one file type.")
+
+# --- NEW USE CASE: Infographic Submission Opportunities ---
+elif selected_use_case_id == "infographic_submission":
+    st.subheader("📊 17. Find Infographic Submission Opportunities")
+    st.markdown("Discover websites that accept infographic submissions in your niche.")
+    infographic_niche = st.text_input("Your Niche/Keywords (e.g., 'data visualization')", key="infographic_niche")
+    infographic_phrases = st.multiselect(
+        "Submission Phrases",
+        ["\"submit infographic\"", "\"infographic submission\"", "\"post infographic\""],
+        default=["\"submit infographic\""],
+        key="infographic_phrases"
+    )
+    if st.button("Generate Query for Infographic Submission", key="infographic_submission_button"):
+        if infographic_niche and infographic_phrases:
+            phrase_query = " | ".join([f"intitle:\"{p}\" OR inurl:{p.replace('\"','').replace(' ','-')}" for p in infographic_phrases])
+            query = f"{infographic_niche} ({phrase_query})"
+            st.code(query)
+            open_google_search(query)
+        else:
+            st.warning("Please enter a niche and select at least one phrase.")
+
+# --- NEW USE CASE: Find Social Profiles for Outreach ---
+elif selected_use_case_id == "social_profiles":
+    st.subheader("👤 18. Find Social Profiles for Outreach")
+    st.markdown("Locate social media profiles for a brand or person for outreach purposes.")
+    profile_name = st.text_input("Brand or Person Name (e.g., 'Elon Musk' or 'Tesla')", key="profile_name")
+    social_platforms = st.multiselect(
+        "Select Social Media Platforms",
+        ["linkedin.com", "twitter.com", "facebook.com", "instagram.com", "youtube.com"],
+        default=["linkedin.com", "twitter.com"],
+        key="social_platforms"
+    )
+    if st.button("Generate Query for Social Profiles", key="social_profiles_button"):
+        if profile_name and social_platforms:
+            platform_query = " OR ".join([f"site:{p}" for p in social_platforms])
+            query = f"\"{profile_name}\" ({platform_query})"
+            st.code(query)
+            open_google_search(query)
+        else:
+            st.warning("Please enter a name and select at least one platform.")
+
+# --- NEW USE CASE: Join Social Conversations on Forums ---
+elif selected_use_case_id == "social_conversations":
+    st.subheader("🗣️ 19. Join Social Conversations on Forums")
+    st.markdown("Find relevant discussions on forums like Reddit and Quora related to your topic.")
+    conversation_topic = st.text_input("Topic Keywords (e.g., 'AI ethics')", key="conversation_topic")
+    forum_sites = st.multiselect(
+        "Select Forum Sites (add custom domains too)",
+        ["reddit.com", "quora.com"],
+        default=["reddit.com", "quora.com"],
+        key="forum_sites"
+    )
+    custom_forum_site = st.text_input("Add Custom Forum Domain (e.g., 'stackexchange.com')", key="custom_forum_site")
+
+    if st.button("Generate Query for Social Conversations", key="social_conversations_button"):
+        if conversation_topic and (forum_sites or custom_forum_site):
+            all_sites = list(forum_sites)
+            if custom_forum_site and is_valid_domain(custom_forum_site):
+                all_sites.append(custom_forum_site)
+            elif custom_forum_site and not is_valid_domain(custom_forum_site):
+                st.warning("Invalid format for 'Custom Forum Domain'. Please enter a valid domain.")
+                all_sites = [] # Prevent invalid domain from being used
+
+            if all_sites:
+                site_query = " OR ".join([f"site:{s}" for s in all_sites])
+                query = f"({site_query}) \"{conversation_topic}\" (intext:question | intext:discussion | intitle:forum)"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter a topic and select/add at least one forum site.")
+        else:
+            st.warning("Please enter a topic and select/add at least one forum site.")
+
 
 st.markdown("---")
 
