@@ -148,14 +148,18 @@ use_case_options = {
     "💬 9. Find Relevant Quora and Reddit Questions to Answer": "qa_sites",
     "⚡ 10. Find How Fast Your Competitors are Publishing New Content": "competitor_content_speed",
     "🔒 11. Find Non-Secure Pages": "non_secure_pages",
-    "📝 12. Find Plagiarized Content": "plagiarized_content",
+    "� 12. Find Plagiarized Content": "plagiarized_content",
     "🧑‍💻 13. Find Prolific Guest Bloggers": "prolific_guest_bloggers",
     "📈 14. Find Competitor's Top Pages for a Keyword": "competitor_top_pages",
     "🔢 15. Find Content in a Numeric Range": "numeric_range",
     "📄 16. Find Credible Sources for Articles": "credible_sources",
-    "📊 17. Find Infographic Submission Opportunities": "infographic_submission", # New
-    "👤 18. Find Social Profiles for Outreach": "social_profiles", # New
-    "🗣️ 19. Join Social Conversations on Forums": "social_conversations" # New
+    "📊 17. Find Infographic Submission Opportunities": "infographic_submission",
+    "👤 18. Find Social Profiles for Outreach": "social_profiles",
+    "🗣️ 19. Join Social Conversations on Forums": "social_conversations",
+    "🌐 20. Find Mentions on Specific Platforms": "platform_mentions", # New
+    "🗓️ 21. Find Outdated Content": "outdated_content", # New
+    "💰 22. Find Sponsored Post Opportunities": "sponsored_post_opportunities", # New
+    "🔍 23. Find Competitor's Content by Topic": "competitor_content_by_topic" # New
 }
 
 selected_use_case_display = st.selectbox(
@@ -167,7 +171,7 @@ selected_use_case_id = use_case_options[selected_use_case_display]
 
 # Conditional rendering for each use case
 if selected_use_case_id == "indexing_issues":
-    st.subheader("🕸️ Find Possible Indexing Issues")
+    st.subheader("🕸️ 1. Find Possible Indexing Issues")
     st.markdown("Check how many pages of your site Google has indexed.")
     indexing_domain = st.text_input("Your Website Domain (e.g., yoursite.com)", key="indexing_domain")
     
@@ -183,7 +187,7 @@ if selected_use_case_id == "indexing_issues":
             st.warning("Please enter a domain.")
 
 elif selected_use_case_id == "analyze_competitors":
-    st.subheader("⚔️ Find and Analyze Your Competitors")
+    st.subheader("⚔️ 2. Find and Analyze Your Competitors")
     st.markdown("Discover similar sites or find competitors targeting specific keywords.")
     comp_domain = st.text_input("Competitor Domain (for 'related:' operator, e.g., competitor.com)", key="comp_domain")
     comp_keywords = st.text_input("Keywords for InTitle/InText (e.g., 'digital marketing')", key="comp_keywords")
@@ -446,7 +450,7 @@ elif selected_use_case_id == "numeric_range":
             open_google_search(query)
 
 elif selected_use_case_id == "credible_sources":
-    st.subheader("� 16. Find Credible Sources for Articles")
+    st.subheader("📄 16. Find Credible Sources for Articles")
     st.markdown("Locate academic papers, reports, or presentations in specific file formats for research.")
     source_keywords = st.text_input("Keywords for Research (e.g., 'LLM training data')", key="source_keywords")
     source_file_types = st.multiselect(
@@ -535,6 +539,101 @@ elif selected_use_case_id == "social_conversations":
                 st.warning("Please enter a topic and select/add at least one forum site.")
         else:
             st.warning("Please enter a topic and select/add at least one forum site.")
+
+# --- NEW USE CASE: Find Mentions on Specific Platforms ---
+elif selected_use_case_id == "platform_mentions":
+    st.subheader("🌐 20. Find Mentions on Specific Platforms")
+    st.markdown("Discover mentions of your brand, product, or topic on specific platforms like Google Docs, SlideShare, etc.")
+    mention_keywords = st.text_input("Brand/Topic Keywords (e.g., 'your company name')", key="mention_keywords")
+    platform_sites = st.multiselect(
+        "Select Platforms (e.g., Google Docs, SlideShare)",
+        ["docs.google.com", "drive.google.com", "slideshare.net", "medium.com", "notion.so"],
+        default=["docs.google.com"],
+        key="platform_sites"
+    )
+    custom_platform_site = st.text_input("Add Custom Platform Domain (e.g., 'evernote.com')", key="custom_platform_site")
+
+    if st.button("Generate Query for Platform Mentions", key="platform_mentions_button"):
+        if mention_keywords and (platform_sites or custom_platform_site):
+            all_sites = list(platform_sites)
+            if custom_platform_site and is_valid_domain(custom_platform_site):
+                all_sites.append(custom_platform_site)
+            elif custom_platform_site and not is_valid_domain(custom_platform_site):
+                st.warning("Invalid format for 'Custom Platform Domain'. Please enter a valid domain.")
+                all_sites = [] # Prevent invalid domain from being used
+
+            if all_sites:
+                site_query = " OR ".join([f"site:{s}" for s in all_sites])
+                query = f"\"{mention_keywords}\" ({site_query})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter keywords and select/add at least one platform site.")
+        else:
+            st.warning("Please enter keywords and select/add at least one platform site.")
+
+# --- NEW USE CASE: Find Outdated Content ---
+elif selected_use_case_id == "outdated_content":
+    st.subheader("🗓️ 21. Find Outdated Content")
+    st.markdown("Identify content on your site that might be old and in need of an update or removal.")
+    outdated_domain = st.text_input("Your Website Domain (e.g., yoursite.com)", key="outdated_domain")
+    outdated_year_before = st.number_input("Content Published Before Year (e.g., 2023)", min_value=1990, max_value=datetime.now().year, value=datetime.now().year - 2, key="outdated_year_before")
+    outdated_keywords = st.text_input("Keywords (optional, e.g., 'guide', 'tutorial')", key="outdated_keywords")
+
+    if st.button("Generate Query for Outdated Content", key="outdated_content_button"):
+        if outdated_domain:
+            if not is_valid_domain(outdated_domain):
+                st.warning("Invalid format for domain. Please enter a valid domain (e.g., yoursite.com).")
+            else:
+                query_parts = [f"site:{outdated_domain}"]
+                if outdated_keywords:
+                    query_parts.append(f"\"{outdated_keywords}\"")
+                
+                # Using 'before:' operator for year
+                query_parts.append(f"before:{outdated_year_before}-01-01")
+                
+                query = " ".join(query_parts).strip()
+                st.code(query)
+                open_google_search(query)
+        else:
+            st.warning("Please enter your website domain.")
+
+# --- NEW USE CASE: Find Sponsored Post Opportunities ---
+elif selected_use_case_id == "sponsored_post_opportunities":
+    st.subheader("💰 22. Find Sponsored Post Opportunities")
+    st.markdown("Discover websites that explicitly mention sponsored posts or advertising opportunities.")
+    sponsored_niche = st.text_input("Your Niche/Keywords (e.g., 'travel blog')", key="sponsored_niche")
+    sponsored_phrases = st.multiselect(
+        "Sponsored Post Phrases",
+        ["\"sponsored post\"", "\"this post was sponsored by\"", "\"advertorial\"", "\"paid post\""],
+        default=["\"sponsored post\""],
+        key="sponsored_phrases"
+    )
+    if st.button("Generate Query for Sponsored Posts", key="sponsored_post_button"):
+        if sponsored_niche and sponsored_phrases:
+            phrase_query = " | ".join([f"intext:\"{p}\" OR intitle:\"{p}\"" for p in sponsored_phrases])
+            query = f"{sponsored_niche} ({phrase_query})"
+            st.code(query)
+            open_google_search(query)
+        else:
+            st.warning("Please enter a niche and select at least one phrase.")
+
+# --- NEW USE CASE: Find Competitor's Content by Topic ---
+elif selected_use_case_id == "competitor_content_by_topic":
+    st.subheader("🔍 23. Find Competitor's Content by Topic")
+    st.markdown("Search for specific topics or keywords within a competitor's website content.")
+    comp_content_topic_domain = st.text_input("Competitor Domain (e.g., competitor.com)", key="comp_content_topic_domain")
+    comp_content_topic_keywords = st.text_input("Topic Keywords (e.g., 'email marketing strategy')", key="comp_content_topic_keywords")
+    
+    if st.button("Generate Query for Competitor Content by Topic", key="comp_content_topic_button"):
+        if comp_content_topic_domain and not is_valid_domain(comp_content_topic_domain):
+            st.warning("Invalid format for 'Competitor Domain'. Please enter a valid domain (e.g., competitor.com).")
+        elif comp_content_topic_domain and comp_content_topic_keywords:
+            query = f"site:{comp_content_topic_domain} \"{comp_content_topic_keywords}\""
+            st.code(query)
+            open_google_search(query)
+        else:
+            st.warning("Please enter both competitor domain and topic keywords.")
 
 
 st.markdown("---")
