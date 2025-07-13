@@ -148,7 +148,7 @@ use_case_options = {
     "💬 9. Find Relevant Quora and Reddit Questions to Answer": "qa_sites",
     "⚡ 10. Find How Fast Your Competitors are Publishing New Content": "competitor_content_speed",
     "🔒 11. Find Non-Secure Pages": "non_secure_pages",
-    "� 12. Find Plagiarized Content": "plagiarized_content",
+    "📝 12. Find Plagiarized Content": "plagiarized_content",
     "🧑‍💻 13. Find Prolific Guest Bloggers": "prolific_guest_bloggers",
     "📈 14. Find Competitor's Top Pages for a Keyword": "competitor_top_pages",
     "🔢 15. Find Content in a Numeric Range": "numeric_range",
@@ -156,10 +156,10 @@ use_case_options = {
     "📊 17. Find Infographic Submission Opportunities": "infographic_submission",
     "👤 18. Find Social Profiles for Outreach": "social_profiles",
     "🗣️ 19. Join Social Conversations on Forums": "social_conversations",
-    "🌐 20. Find Mentions on Specific Platforms": "platform_mentions", # New
-    "🗓️ 21. Find Outdated Content": "outdated_content", # New
-    "💰 22. Find Sponsored Post Opportunities": "sponsored_post_opportunities", # New
-    "🔍 23. Find Competitor's Content by Topic": "competitor_content_by_topic" # New
+    "🌐 20. Find Mentions on Specific Platforms": "platform_mentions",
+    "🗓️ 21. Find Outdated Content": "outdated_content",
+    "💰 22. Find Sponsored Post Opportunities": "sponsored_post_opportunities",
+    "🔍 23. Find Competitor's Content by Topic": "competitor_content_by_topic"
 }
 
 selected_use_case_display = st.selectbox(
@@ -643,44 +643,74 @@ st.header("General Query Builder")
 with st.expander("🛠️ Build Your Custom Query", expanded=True):
     st.markdown("Combine various operators and keywords to create highly specific searches.")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        keywords = st.text_input("General Keywords (e.g., 'SEO tips')", key="gen_keywords_final")
-        site_domain = st.text_input("Site (e.g., example.com)", key="gen_site_final")
-        intitle_phrase = st.text_input("InTitle (exact phrase, e.g., 'write for us')", key="gen_intitle_final")
-        inurl_phrase = st.text_input("InURL (exact phrase, e.g., 'guest-post')", key="gen_inurl_final")
-        filetype_ext = st.text_input("Filetype (e.g., pdf, doc, xls)", key="gen_filetype_final")
+    # Section 1: Core Search Terms
+    st.subheader("1. Core Search Terms")
+    keywords = st.text_input("Main Keywords (e.g., 'SEO tips')", key="gen_keywords_final")
 
-    with col2:
-        exact_match_phrase = st.text_input("Exact Match Phrase (\"...\")", key="gen_exact_match_final")
-        exclude_term = st.text_input("Exclude Term (-term)", key="gen_exclude_final")
-        or_terms = st.text_input("OR Terms (term1 | term2)", help="Use '|' for OR, e.g., 'marketing | SEO'", key="gen_or_final")
-        before_date = st.date_input("Before Date (YYYY-MM-DD)", value=None, key="gen_before_final")
-        after_date = st.date_input("After Date (YYYY-MM-DD)", value=None, key="gen_after_final")
-        related_site = st.text_input("Related Site (e.g., example.com)", key="gen_related_final")
-        
-        # AROUND(X) operator
-        st.markdown("---")
-        st.subheader("AROUND(X) Operator")
-        around_term1 = st.text_input("AROUND(X) - Term 1", key="gen_around_term1_final")
-        around_term2 = st.text_input("AROUND(X) - Term 2", key="gen_around_term2_final")
-        around_x = st.number_input("AROUND(X) - X (number of words apart)", min_value=1, value=5, key="gen_around_x_final")
+    # Section 2: Domain & URL Filters
+    st.subheader("2. Domain & URL Filters")
+    col_domain1, col_domain2, col_domain3 = st.columns(3)
+    with col_domain1:
+        site_domain = st.text_input("Target Site (e.g., example.com)", help="Limit results to a specific website.", key="gen_site_final")
+    with col_domain2:
+        intitle_phrase = st.text_input("InTitle (exact phrase in page title, e.g., 'write for us')", help="Find pages with this exact phrase in their title.", key="gen_intitle_final")
+    with col_domain3:
+        inurl_phrase = st.text_input("InURL (exact phrase in URL, e.g., 'guest-post')", help="Find pages with this exact phrase in their URL.", key="gen_inurl_final")
+    
+    filetype_ext = st.text_input("Filetype (e.g., pdf, doc, xls)", help="Limit results to specific file types.", key="gen_filetype_final")
 
-        # cache: operator
-        st.markdown("---")
-        st.subheader("Cache Operator")
-        cache_url = st.text_input("Cache URL (e.g., example.com/page)", key="gen_cache_url_final")
+    # Section 3: Inclusion & Exclusion
+    st.subheader("3. Inclusion & Exclusion")
+    col_inc1, col_inc2 = st.columns(2)
+    with col_inc1:
+        exact_match_phrase = st.text_input("Exact Match Phrase (\"...\")", help="Search for this exact phrase.", key="gen_exact_match_final")
+        exclude_term = st.text_input("Exclude Term (-term)", help="Exclude results containing this term.", key="gen_exclude_final")
+    with col_inc2:
+        or_terms = st.text_input("OR Terms (term1 | term2)", help="Find results matching term1 OR term2. Use '|' to separate terms (e.g., 'marketing | SEO').", key="gen_or_final")
+
+    # Section 4: Date & Proximity Filters
+    st.subheader("4. Date & Proximity Filters")
+    col_date1, col_date2 = st.columns(2)
+    with col_date1:
+        before_date = st.date_input("Before Date (YYYY-MM-DD)", value=None, help="Find results published before this date.", key="gen_before_final")
+    with col_date2:
+        after_date = st.date_input("After Date (YYYY-MM-DD)", value=None, help="Find results published after this date.", key="gen_after_final")
+    
+    st.markdown("---")
+    st.subheader("AROUND(X) Operator (Terms within X words of each other)")
+    col_around1, col_around2, col_around3 = st.columns(3)
+    with col_around1:
+        around_term1 = st.text_input("Term 1", key="gen_around_term1_final")
+    with col_around2:
+        around_term2 = st.text_input("Term 2", key="gen_around_term2_final")
+    with col_around3:
+        around_x = st.number_input("X (words apart)", min_value=1, value=5, key="gen_around_x_final")
+    if (around_term1 and not around_term2) or (not around_term1 and around_term2):
+        st.warning("For AROUND(X), please provide both terms.")
+
+
+    # Section 5: Niche & Advanced Operators
+    st.subheader("5. Niche & Advanced Operators")
+    col_niche1, col_niche2 = st.columns(2)
+    with col_niche1:
+        related_site = st.text_input("Related Site (e.g., example.com)", help="Find sites similar to this one.", key="gen_related_final")
+    with col_niche2:
+        cache_url = st.text_input("Cache URL (e.g., example.com/page)", help="View Google's cached version of a page.", key="gen_cache_url_final")
 
 
     generated_query_parts = []
     
     # Input validation for domains
     if site_domain and not is_valid_domain(site_domain):
-        st.warning("Invalid format for 'Site' domain. Please enter a valid domain (e.g., example.com).")
+        st.warning("Invalid format for 'Target Site' domain. Please enter a valid domain (e.g., example.com).")
         site_domain = "" # Clear invalid input
     if related_site and not is_valid_domain(related_site):
         st.warning("Invalid format for 'Related Site' domain. Please enter a valid domain (e.g., example.com).")
         related_site = "" # Clear invalid input
+    if cache_url and not (cache_url.startswith("http://") or cache_url.startswith("https://") or is_valid_domain(cache_url)):
+        st.warning("Invalid format for 'Cache URL'. Please enter a valid URL or domain (e.g., example.com/page).")
+        cache_url = "" # Clear invalid input
+
 
     if keywords:
         generated_query_parts.append(keywords)
@@ -713,8 +743,6 @@ with st.expander("🛠️ Build Your Custom Query", expanded=True):
     # Add AROUND(X) to query
     if around_term1 and around_term2:
         generated_query_parts.append(f"\"{around_term1}\" AROUND({around_x}) \"{around_term2}\"")
-    elif around_term1 or around_term2:
-        st.warning("For AROUND(X), please provide both terms.")
 
     # Add cache: to query
     if cache_url:
