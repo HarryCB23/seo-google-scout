@@ -80,15 +80,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Tabs ---
-tabs = st.tabs([
-    "Cheatsheet",
-    "Specific Use Cases",
-    "General Query Builder",
-    "Feedback"
+tab_cheatsheet, tab_use_cases, tab_general_builder, tab_feedback = st.tabs([
+    "📖 Cheatsheet", "🎯 Specific Use Cases", "🛠️ General Query Builder", "💬 Feedback"
 ])
 
-# --- Tab 1: Cheatsheet ---
-with tabs[0]:
+### TAB 1: Cheatsheet
+with tab_cheatsheet:
     st.title("🔍 Google SEO Scout")
     st.markdown("""
         Welcome to **Google SEO Scout**! This app helps you build powerful Google search queries using advanced search operators.
@@ -132,67 +129,367 @@ with tabs[0]:
         | `related:` | Finds sites related to a specified domain. | `related:nytimes.com` |
         """)
 
-# --- Tab 2: Specific Use Cases ---
-with tabs[1]:
+### TAB 2: Specific Use Cases (ALL USE CASES INCLUDED)
+with tab_use_cases:
     st.header("Specific Use Cases")
-    st.markdown("""
-        Choose a use case to quickly generate a targeted Google search query.
-    """)
+    st.markdown("Choose a use case to quickly generate a targeted Google search query.")
 
     use_case_options = [
-        "Find Guest Post Opportunities",
-        "Check Site Indexing",
-        "Competitor Content Analysis",
-        "Discover PDF Resources",
-        "Custom"
+        "🕸️ Find Possible Indexing Issues",
+        "⚔️ Find and Analyze Your Competitors",
+        "✍️ Find Guest Post Opportunities",
+        "📚 Find Resource Page Opportunities",
+        "📄 Find Specific File Types on a Site",
+        "🔗 Find Opportunities to Add Internal Links",
+        "🏆 Find “Best” Listicles that Don’t Mention Your Brand",
+        "⭐ Find Websites that Have Reviewed Competitors",
+        "💬 Find Relevant Quora and Reddit Questions to Answer",
+        "⚡ Find How Fast Your Competitors are Publishing New Content",
+        "🔒 Find Non-Secure Pages",
+        "📝 Find Plagiarized Content",
+        "🧑‍💻 Find Prolific Guest Bloggers",
+        "📈 Find Competitor's Top Pages for a Keyword",
+        "🔢 Find Content in a Numeric Range",
+        "📄 Find Credible Sources for Articles",
+        "📊 Find Infographic Submission Opportunities",
+        "👤 Find Social Profiles for Outreach",
+        "🗣️ Join Social Conversations on Forums",
+        "🌐 Find Mentions on Specific Platforms",
+        "🗓️ Find Outdated Content",
+        "💰 Find Sponsored Post Opportunities",
+        "🔍 Find Competitor's Content by Topic"
     ]
     selected_case = st.selectbox("Choose a use case", use_case_options)
 
-    # Default values
-    keywords, site, inurl, intitle, filetype = "", "", "", "", ""
+    # For each use case, show relevant input, build query, and allow opening in Google.
+    # For brevity, here are the first two; add all rest in similar style.
 
-    if selected_case == "Find Guest Post Opportunities":
-        st.markdown("**Find Guest Post Opportunities**")
-        site = st.text_input("Domain to target (optional, e.g. example.com)", key="gp_site")
-        keywords = st.text_input("Keywords", value="guest post", key="gp_keywords")
-        inurl = "guest-post"
-        intitle = "write for us"
-    elif selected_case == "Check Site Indexing":
-        st.markdown("**Check Site Indexing**")
-        site = st.text_input("Domain to check index status (e.g. example.com)", key="idx_site")
-        keywords = ""
-    elif selected_case == "Competitor Content Analysis":
-        st.markdown("**Competitor Content Analysis**")
-        site = st.text_input("Competitor domain (e.g. example.com)", key="comp_site")
-        keywords = st.text_input("Competitor keywords", key="comp_keywords")
-    elif selected_case == "Discover PDF Resources":
-        st.markdown("**Discover PDF Resources**")
-        keywords = st.text_input("Topic for PDFs", key="pdf_keywords")
-        filetype = "pdf"
-        site = st.text_input("Domain to target (optional, e.g. example.com)", key="pdf_site")
-    elif selected_case == "Custom":
-        st.info("Use the General Query Builder tab for custom combinations.")
+    if selected_case == "🕸️ Find Possible Indexing Issues":
+        st.subheader("Find Possible Indexing Issues")
+        domain = st.text_input("Your Website Domain (e.g., yoursite.com)", key="indexing_domain")
+        if st.button("Generate Query", key="indexing_btn"):
+            if domain and is_valid_domain(domain):
+                query = f"site:{domain}"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter a valid domain.")
 
-    query_parts = []
-    if keywords: query_parts.append(keywords)
-    if site: query_parts.append(f"site:{site}")
-    if inurl: query_parts.append(f"inurl:{inurl}")
-    if intitle: query_parts.append(f'intitle:"{intitle}"')
-    if filetype: query_parts.append(f"filetype:{filetype}")
+    elif selected_case == "⚔️ Find and Analyze Your Competitors":
+        st.subheader("Find and Analyze Your Competitors")
+        competitor_domain = st.text_input("Competitor Domain (e.g., competitor.com)", key="comp_domain")
+        keyword = st.text_input("Keyword (optional)", key="comp_keyword")
+        if st.button("Generate Query", key="comp_btn"):
+            query = ""
+            if competitor_domain and is_valid_domain(competitor_domain):
+                query += f"related:{competitor_domain} "
+            if keyword:
+                query += f"{keyword}"
+            query = query.strip()
+            if query:
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter domain or keyword.")
 
-    specific_query = " ".join(query_parts).strip()
-    st.markdown("---")
-    st.subheader("Generated Query")
-    st.code(specific_query if specific_query else "Your query will appear here.")
+    elif selected_case == "✍️ Find Guest Post Opportunities":
+        st.subheader("Find Guest Post Opportunities")
+        niche = st.text_input("Your Niche (e.g., SEO)", key="guest_niche")
+        phrases = st.multiselect("Guest Post Phrases",
+            ["\"write for us\"", "\"guest post\"", "\"contribute\"", "\"submit a post\"", "\"guest blogging guidelines\""],
+            default=["\"write for us\""], key="guest_phrases")
+        if st.button("Generate Query", key="guest_btn"):
+            if niche and phrases:
+                phrase_query = " | ".join(phrases)
+                query = f"{niche} ({phrase_query})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter niche and select phrases.")
 
-    if st.button("Open Specific Query in Google"):
-        if specific_query:
-            open_google_search(specific_query)
-        else:
-            st.warning("Please build a query first!")
+    elif selected_case == "📚 Find Resource Page Opportunities":
+        st.subheader("Find Resource Page Opportunities")
+        topic = st.text_input("Topic/Keyword (e.g., SEO tools)", key="resource_topic")
+        if st.button("Generate Query", key="resource_btn"):
+            if topic:
+                query = f"{topic} (intitle:resources | inurl:resource | intitle:links | inurl:links | intitle:directory)"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter a topic.")
 
-# --- Tab 3: General Query Builder ---
-with tabs[2]:
+    elif selected_case == "📄 Find Specific File Types on a Site":
+        st.subheader("Find Specific File Types on a Site")
+        file_site = st.text_input("Site Domain (optional, e.g., yoursite.com)", key="file_site")
+        file_keywords = st.text_input("Keywords (optional)", key="file_keywords")
+        file_types = st.multiselect(
+            "File Types", ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "csv", "xml", "txt", "zip", "sql", "env", "bak"],
+            default=["pdf"], key="file_types")
+        if st.button("Generate Query", key="file_btn"):
+            query = ""
+            if file_site and is_valid_domain(file_site):
+                query += f"site:{file_site} "
+            if file_keywords:
+                query += f"{file_keywords} "
+            if file_types:
+                query += "(" + " | ".join([f"filetype:{ft}" for ft in file_types]) + ")"
+            query = query.strip()
+            if query:
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please fill at least one field.")
+
+    elif selected_case == "🔗 Find Opportunities to Add Internal Links":
+        st.subheader("Find Opportunities to Add Internal Links")
+        site = st.text_input("Your Site/Blog Domain", key="internal_link_site")
+        keyword = st.text_input("Target Keyword", key="internal_link_keyword")
+        if st.button("Generate Query", key="internal_link_btn"):
+            if site and is_valid_domain(site) and keyword:
+                query = f"site:{site} \"{keyword}\""
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter domain and keyword.")
+
+    elif selected_case == "🏆 Find “Best” Listicles that Don’t Mention Your Brand":
+        st.subheader("Find “Best” Listicles that Don’t Mention Your Brand")
+        brand = st.text_input("Your Brand Name", key="listicle_brand")
+        topic = st.text_input("Listicle Topic", key="listicle_topic")
+        if st.button("Generate Query", key="listicle_btn"):
+            if brand and topic:
+                query = f"intitle:best \"{topic}\" -\"{brand}\""
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter brand and topic.")
+
+    elif selected_case == "⭐ Find Websites that Have Reviewed Competitors":
+        st.subheader("Find Websites that Have Reviewed Competitors")
+        competitors = st.text_area("Competitor Brands (one per line)", key="review_competitors")
+        if st.button("Generate Query", key="review_btn"):
+            brands = [b.strip() for b in competitors.split('\n') if b.strip()]
+            if brands:
+                query = f"allintitle:review ({' OR '.join([f'\"{b}\"' for b in brands])})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter at least one competitor.")
+
+    elif selected_case == "💬 Find Relevant Quora and Reddit Questions to Answer":
+        st.subheader("Find Relevant Quora and Reddit Questions to Answer")
+        topics = st.text_input("Topics (comma separated)", key="qa_topics")
+        if st.button("Generate Query", key="qa_btn"):
+            topic_query = " | ".join([t.strip() for t in topics.split(',') if t.strip()])
+            if topic_query:
+                query = f"(site:quora.com OR site:reddit.com) inurl:({topic_query})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter topics.")
+
+    elif selected_case == "⚡ Find How Fast Your Competitors are Publishing New Content":
+        st.subheader("Find How Fast Your Competitors are Publishing New Content")
+        domain = st.text_input("Competitor Domain", key="comp_speed_domain")
+        after = st.date_input("Published After Date", value=None, key="comp_speed_after")
+        before = st.date_input("Published Before Date", value=None, key="comp_speed_before")
+        if st.button("Generate Query", key="comp_speed_btn"):
+            query = ""
+            if domain and is_valid_domain(domain):
+                query += f"site:{domain} "
+            if after:
+                query += f"after:{after.strftime('%Y-%m-%d')} "
+            if before:
+                query += f"before:{before.strftime('%Y-%m-%d')}"
+            query = query.strip()
+            if query:
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please fill at least one field.")
+
+    elif selected_case == "🔒 Find Non-Secure Pages":
+        st.subheader("Find Non-Secure Pages")
+        domain = st.text_input("Your Website Domain", key="non_secure_domain")
+        if st.button("Generate Query", key="non_secure_btn"):
+            if domain and is_valid_domain(domain):
+                query = f"site:{domain} -inurl:https"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter domain.")
+
+    elif selected_case == "📝 Find Plagiarized Content":
+        st.subheader("Find Plagiarized Content")
+        text = st.text_area("Exact Text Snippet", key="plagiarism_text")
+        if st.button("Generate Query", key="plagiarism_btn"):
+            if text:
+                query = f"allintext:\"{text}\""
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter a text snippet.")
+
+    elif selected_case == "🧑‍💻 Find Prolific Guest Bloggers":
+        st.subheader("Find Prolific Guest Bloggers")
+        niche = st.text_input("Niche/Keywords", key="blogger_niche")
+        author = st.text_input("Specific Author Name (optional)", key="blogger_author")
+        if st.button("Generate Query", key="blogger_btn"):
+            query = ""
+            if niche:
+                query += niche + " "
+            if author:
+                formatted = author.lower().replace(" ", "-")
+                query += f"inurl:author/{formatted}"
+            else:
+                query += "inurl:author/"
+            query = query.strip()
+            if query:
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter a niche or author.")
+
+    elif selected_case == "📈 Find Competitor's Top Pages for a Keyword":
+        st.subheader("Find Competitor's Top Pages for a Keyword")
+        domain = st.text_input("Competitor Domain", key="top_pages_domain")
+        keyword = st.text_input("Keyword/Topic", key="top_pages_keyword")
+        if st.button("Generate Query", key="top_pages_btn"):
+            if domain and is_valid_domain(domain) and keyword:
+                query = f"site:{domain} inurl:\"{keyword}\""
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter domain and keyword.")
+
+    elif selected_case == "🔢 Find Content in a Numeric Range":
+        st.subheader("Find Content in a Numeric Range")
+        keywords = st.text_input("Keywords", key="numeric_keywords")
+        min_value = st.number_input("Min Value", min_value=0, value=10, key="min_value")
+        max_value = st.number_input("Max Value", min_value=0, value=100, key="max_value")
+        currency_symbol = st.text_input("Currency Symbol (optional)", max_chars=1, key="currency_symbol")
+        if st.button("Generate Query", key="numeric_btn"):
+            if min_value < max_value:
+                range_query = f"{currency_symbol}{min_value}..{currency_symbol}{max_value}"
+                query = f"{keywords} {range_query}".strip()
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Min value must be less than max value.")
+
+    elif selected_case == "📄 Find Credible Sources for Articles":
+        st.subheader("Find Credible Sources for Articles")
+        keywords = st.text_input("Keywords for Research", key="source_keywords")
+        file_types = st.multiselect("File Types", ["pdf", "ppt", "pptx", "doc", "docx"], default=["pdf"], key="source_file_types")
+        if st.button("Generate Query", key="source_btn"):
+            if keywords and file_types:
+                filetype_query = " | ".join([f"filetype:{ft}" for ft in file_types])
+                query = f"{keywords} ({filetype_query})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please fill both fields.")
+
+    elif selected_case == "📊 Find Infographic Submission Opportunities":
+        st.subheader("Find Infographic Submission Opportunities")
+        niche = st.text_input("Niche/Keywords", key="infographic_niche")
+        phrases = st.multiselect("Submission Phrases", ["\"submit infographic\"", "\"infographic submission\"", "\"post infographic\""], default=["\"submit infographic\""], key="infographic_phrases")
+        if st.button("Generate Query", key="infographic_btn"):
+            if niche and phrases:
+                phrase_query = " | ".join([f"intitle:{p} OR inurl:{p.replace('\"','').replace(' ','-')}" for p in phrases])
+                query = f"{niche} ({phrase_query})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please fill both fields.")
+
+    elif selected_case == "👤 Find Social Profiles for Outreach":
+        st.subheader("Find Social Profiles for Outreach")
+        name = st.text_input("Brand or Person Name", key="social_name")
+        platforms = st.multiselect("Platforms", ["linkedin.com", "twitter.com", "facebook.com", "instagram.com", "youtube.com"], default=["linkedin.com", "twitter.com"], key="social_platforms")
+        if st.button("Generate Query", key="social_btn"):
+            if name and platforms:
+                site_query = " OR ".join([f"site:{p}" for p in platforms])
+                query = f"\"{name}\" ({site_query})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please fill both fields.")
+
+    elif selected_case == "🗣️ Join Social Conversations on Forums":
+        st.subheader("Join Social Conversations on Forums")
+        topic = st.text_input("Topic Keywords", key="conversation_topic")
+        forum_sites = st.multiselect("Forum Sites", ["reddit.com", "quora.com"], default=["reddit.com", "quora.com"], key="forum_sites")
+        custom_forum = st.text_input("Custom Forum Domain (optional)", key="custom_forum")
+        if st.button("Generate Query", key="conversation_btn"):
+            all_sites = forum_sites
+            if custom_forum and is_valid_domain(custom_forum):
+                all_sites.append(custom_forum)
+            site_query = " OR ".join([f"site:{s}" for s in all_sites])
+            if topic and all_sites:
+                query = f"({site_query}) \"{topic}\" (intext:question | intext:discussion | intitle:forum)"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter a topic and at least one forum.")
+
+    elif selected_case == "🌐 Find Mentions on Specific Platforms":
+        st.subheader("Find Mentions on Specific Platforms")
+        keywords = st.text_input("Brand/Topic Keywords", key="mention_keywords")
+        platforms = st.multiselect("Platforms", ["docs.google.com", "drive.google.com", "slideshare.net", "medium.com", "notion.so"], default=["docs.google.com"], key="mention_platforms")
+        custom_platform = st.text_input("Custom Platform Domain (optional)", key="custom_platform")
+        if st.button("Generate Query", key="mention_btn"):
+            all_sites = platforms
+            if custom_platform and is_valid_domain(custom_platform):
+                all_sites.append(custom_platform)
+            site_query = " OR ".join([f"site:{s}" for s in all_sites])
+            if keywords and all_sites:
+                query = f"\"{keywords}\" ({site_query})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please fill both fields.")
+
+    elif selected_case == "🗓️ Find Outdated Content":
+        st.subheader("Find Outdated Content")
+        domain = st.text_input("Website Domain", key="outdated_domain")
+        year_before = st.number_input("Published Before Year", min_value=1990, max_value=datetime.now().year, value=datetime.now().year-2, key="outdated_year")
+        keywords = st.text_input("Keywords (optional)", key="outdated_keywords")
+        if st.button("Generate Query", key="outdated_btn"):
+            if domain and is_valid_domain(domain):
+                query = f"site:{domain} \"{keywords}\" before:{year_before}-01-01" if keywords else f"site:{domain} before:{year_before}-01-01"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter a valid domain.")
+
+    elif selected_case == "💰 Find Sponsored Post Opportunities":
+        st.subheader("Find Sponsored Post Opportunities")
+        niche = st.text_input("Niche/Keywords", key="sponsored_niche")
+        phrases = st.multiselect("Sponsored Post Phrases", ["\"sponsored post\"", "\"this post was sponsored by\"", "\"advertorial\"", "\"paid post\""], default=["\"sponsored post\""], key="sponsored_phrases")
+        if st.button("Generate Query", key="sponsored_btn"):
+            if niche and phrases:
+                phrase_query = " | ".join([f"intext:{p} OR intitle:{p}" for p in phrases])
+                query = f"{niche} ({phrase_query})"
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please fill both fields.")
+
+    elif selected_case == "🔍 Find Competitor's Content by Topic":
+        st.subheader("Find Competitor's Content by Topic")
+        domain = st.text_input("Competitor Domain", key="comp_topic_domain")
+        keywords = st.text_input("Topic Keywords", key="comp_topic_keywords")
+        if st.button("Generate Query", key="comp_topic_btn"):
+            if domain and is_valid_domain(domain) and keywords:
+                query = f"site:{domain} \"{keywords}\""
+                st.code(query)
+                open_google_search(query)
+            else:
+                st.warning("Please enter domain and keywords.")
+
+### TAB 3: General Query Builder
+with tab_general_builder:
     st.header("General Query Builder")
     st.markdown("Build your custom Google search by combining operators below.")
 
@@ -228,22 +525,17 @@ with tabs[2]:
 
     # --- Build query string ---
     parts = []
-    # Core
     if keywords: parts.append(keywords)
-    # Domain & URL
     if site_domain: parts.append(f"site:{site_domain}")
     if inurl: parts.append(f"inurl:{inurl}")
     if intitle: parts.append(f'intitle:{intitle}')
     if filetype: parts.append(f"filetype:{filetype}")
-    # Inclusion & Exclusion
     if exact_match: parts.append(f"\"{exact_match}\"")
     if exclude: parts.append(f"-{exclude}")
     if or_terms: parts.append(f"({or_terms})")
-    # Date & Proximity
     if before: parts.append(f"before:{before}")
     if after: parts.append(f"after:{after}")
     if term1 and term2: parts.append(f"\"{term1}\" AROUND({around_x}) \"{term2}\"")
-    # Niche Operators
     if related: parts.append(f"related:{related}")
     if cache: parts.append(f"cache:{cache}")
 
@@ -251,15 +543,14 @@ with tabs[2]:
     st.markdown("---")
     st.subheader("Generated Query")
     st.code(query_str if query_str else "Your query will appear here as you add terms.")
-
     if st.button("Open General Query in Google"):
         if query_str:
             open_google_search(query_str)
         else:
             st.warning("Please build a query first!")
 
-# --- Tab 4: Feedback ---
-with tabs[3]:
+### TAB 4: Feedback
+with tab_feedback:
     st.header("Feedback & Suggestions")
     st.markdown("Help us improve Google SEO Scout! Share your thoughts or suggest new operator combinations.")
     with st.form("feedback_form"):
@@ -268,7 +559,6 @@ with tabs[3]:
         if submit_feedback:
             if feedback_text:
                 st.success("Thank you for your feedback! We appreciate your input.")
-                # In a real application, you would store this feedback
             else:
                 st.warning("Please enter some feedback before submitting.")
 
