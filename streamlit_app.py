@@ -96,35 +96,34 @@ with tab_cheatsheet:
         st.markdown("""
         | Operator | What it does | Example |
         |---|---|---|
-        | `" "` | Forces exact-match searches. | `"nikola tesla"` |
-        | `OR` | Searches for results related to X or Y, not necessarily both. | `tesla OR edison` |
+        | `" "` | Forces exact-match searches. | `"marie curie"` |
+        | `OR` | Searches for results related to X or Y, not necessarily both. | `curie OR roentgen` |
         | `|` | Functions identically to "OR." | `tesla | edison` |
-        | `()` | Groups operators to control the order of execution. | `(tesla OR edison) alternating current` |
-        | `-` | Excludes terms from search results. | `tesla -motors` |
-        | `*` | Acts as a wildcard for matching any word or phrase. | `tesla "rock * roll"` |
-        | `..` | Searches within a range of numbers. | `logitech keyboard $50..$60` |
+        | `()` | Groups operators to control the order of execution. | `(curie OR roentgen) radioactivity` |
+        | `-` | Excludes terms from search results. | `curie -elements` |
+        | `*` | Acts as a wildcard for matching any word or phrase. | `curie "discovery of *"` |
+        | `..` | Searches within a range of numbers. | `sony tv 400..500 pounds` |
         | `$` | Searches for specific prices. | `tesla deposit $1000` |
         | `€` | Searches for prices in euros. | `€9.99 lunch deals` |
         | `in` | Converts units. | `250 kph in mph` |
-        | `define:` | Searches for the definition of a word or phrase. | `define:telescope` |
-        | `filetype:` | Searches for specific types of files. | `"tesla announcements" filetype:pdf` |
-        | `ext:` | Same as filetype, searching for specific file extensions. | `azure ext:pdf` |
-        | `site:` | Searches within a specific website. | `site:goodwill.org` |
-        | `intitle:` | Searches only within page titles. | `intitle:"tesla vs edison"` |
-        | `allintitle:` | Searches for every term following "allintitle" within page titles. | `allintitle: tesla vs edison` |
+        | `define:` | Searches for the definition of a word or phrase. | `define:quantum` |
+        | `filetype:` | Searches for specific types of files. | `"AI ethics report" filetype:pdf` |
+        | `ext:` | Same as filetype, searching for specific file extensions. | `renewable energy ext:ppt` |
+        | `site:` | Searches within a specific website. | `site:wikipedia.org` |
+        | `intitle:` | Searches only within page titles. | `intitle:"history of space exploration"` |
+        | `allintitle:` | Searches for every term following "allintitle" within page titles. | `allintitle: ancient roman architecture` |
         | `inurl:` | Looks for words or phrases within a URL. | `tesla announcements inurl:2024` |
-        | `allinurl:` | Searches the URL for every term following "allinurl." | `allinurl: amazon field-keywords nikon` |
-        | `intext:` | Searches for words or phrases within the body text of a document. | `intext:"orbi vs eero vs google wifi"` |
-        | `allintext:` | Searches the body text for every term following "allintext." | `allintext: orbi eero google wifi` |
-        | `AROUND(X)` | Finds terms within X words of each other in a text. | `tesla AROUND(3) edison` |
+        | `allinurl:` | Searches the URL for every term following "allinurl." | `allinurl: science journal astrophysics latest` |
+        | `intext:` | Searches for words or phrases within the body text of a document. | `intext:"shakespeare vs marlowe vs jonson"` |
+        | `allintext:` | Searches the body text for every term following "allintext." | `allintext: sustainable urban planning solutions` |
+        | `AROUND(X)` | Finds terms within X words of each other in a text. | `darwin AROUND(5) evolution` |
         | `weather:` | Searches for the weather in a specified location. | `weather:New Jersey` |
         | `stocks:` | Searches for stock information using a ticker symbol. | `stocks:nvidia` |
         | `map:` | Forces Google to show map results for a location. | `map:Manhattan` |
         | `movie:` | Searches for information about a specific movie. | `movie:Oppenheimer` |
-        | `source:` | Searches for news from a specific source. | `deepseek source:cnn` |
+        | `source:` | Searches for news from a specific source. | `climate change source:bbc.com` |
         | `before:` | Searches for results before a specific date. | `Microsoft before:2010-05-08` |
         | `after:` | Searches for results after a specific date. | `Microsoft after:2010-05-08` |
-        | `cache:` | Displays Google's cached version of a web page. | `cache:example.com` |
         | `info:` | Presents information about a web page. | `info:example.com` |
         | `related:` | Finds sites related to a specified domain. | `related:nytimes.com` |
         """)
